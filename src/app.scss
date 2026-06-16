@@ -1,0 +1,68 @@
+@use '@/styles/compat.scss';
+@use '@/styles/variables.scss' as *;
+
+// 全局样式
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB',
+    sans-serif;
+  font-size: $font-size-md;
+  line-height: $line-height-normal;
+  color: $color-text-primary;
+  background: linear-gradient(180deg, #e8f0fe 0%, $color-bg-page 100%);
+  min-height: 100vh;
+}
+
+.pageContainer {
+  padding: $spacing-lg $page-padding $spacing-xl;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-md;
+}
+
+.gradientBg {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flexCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.flexBetween {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flexCenter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.textEllipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+

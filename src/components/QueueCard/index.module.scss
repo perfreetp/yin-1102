@@ -1,0 +1,115 @@
+@use '@/styles/variables.scss' as *;
+
+.queueCard {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  color: $color-text-white;
+  margin-bottom: $spacing-md;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+}
+
+.stationInfo {
+  flex: 1;
+}
+
+.stationName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-xs;
+}
+
+.joinTime {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+}
+
+.statusBadge {
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.mainInfo {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  margin: $spacing-md 0;
+}
+
+.infoItem {
+  text-align: center;
+}
+
+.infoValue {
+  font-size: 48rpx;
+  font-weight: $font-weight-bold;
+  line-height: 1.2;
+}
+
+.infoLabel {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+  margin-top: $spacing-xs;
+}
+
+.highlightValue {
+  color: #ffe082;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-md;
+}
+
+.preference {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.preferenceLabel {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+}
+
+.preferenceValue {
+  padding: $spacing-xs $spacing-sm;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.estimatedTime {
+  font-size: $font-size-sm;
+  opacity: 0.85;
+}
+
+.progressBar {
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: $radius-round;
+  margin-top: $spacing-md;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #ffe082;
+  border-radius: $radius-round;
+  transition: width $transition-base;
+}

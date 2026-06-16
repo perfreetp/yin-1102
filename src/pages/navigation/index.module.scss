@@ -1,0 +1,341 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-lg $page-padding $spacing-xl;
+  box-sizing: border-box;
+}
+
+.mapContainer {
+  position: relative;
+  width: 100%;
+  height: 600rpx;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: $radius-lg;
+  overflow: hidden;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.mapBg {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.road {
+  position: absolute;
+  background: #90a4ae;
+  opacity: 0.6;
+}
+
+.roadH {
+  height: 40rpx;
+  left: 0;
+  right: 0;
+}
+
+.roadV {
+  width: 40rpx;
+  top: 0;
+  bottom: 0;
+}
+
+.zone {
+  position: absolute;
+  border-radius: $radius-md;
+  border: 2rpx dashed rgba(0, 0, 0, 0.1);
+}
+
+.zoneA {
+  left: 60rpx;
+  top: 80rpx;
+  width: 300rpx;
+  height: 180rpx;
+  background: rgba(30, 136, 229, 0.15);
+}
+
+.zoneB {
+  left: 60rpx;
+  top: 300rpx;
+  width: 300rpx;
+  height: 180rpx;
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.zoneC {
+  right: 60rpx;
+  top: 80rpx;
+  width: 280rpx;
+  height: 180rpx;
+  background: rgba(156, 39, 176, 0.15);
+}
+
+.zoneLabel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+.mapControls {
+  position: absolute;
+  right: $spacing-md;
+  bottom: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+  z-index: 30;
+}
+
+.controlBtn {
+  @include button-reset;
+  width: 72rpx;
+  height: 72rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  font-size: 32rpx;
+  box-shadow: $shadow-card;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.filterSection {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.titleIcon {
+  font-size: $font-size-lg;
+}
+
+.filterTabs {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: wrap;
+}
+
+.filterTab {
+  @include button-reset;
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  box-shadow: $shadow-card;
+  height: 64rpx;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.filterTabActive {
+  background: $color-primary;
+  color: $color-text-white;
+}
+
+.tabIcon {
+  margin-right: $spacing-xs;
+}
+
+.pointsList {
+  margin-bottom: $spacing-lg;
+}
+
+.pointCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.99);
+  }
+}
+
+.pointHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.pointInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.pointIcon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+}
+
+.pointDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.pointName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.pointDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-top: 4rpx;
+}
+
+.pointStatus {
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+}
+
+.statusAvailable {
+  background: #e8f5e9;
+  color: $color-success;
+}
+
+.statusOccupied {
+  background: #ffebee;
+  color: $color-error;
+}
+
+.navigateBtn {
+  @include button-reset;
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-tag;
+  color: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  height: 56rpx;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.stationDetails {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.detailItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.detailIcon {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  background: $color-bg-tag;
+  color: $color-primary;
+  flex-shrink: 0;
+}
+
+.detailContent {
+  flex: 1;
+}
+
+.detailTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.detailDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+}
+
+.legend {
+  display: flex;
+  justify-content: space-around;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.legendDot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+}
+
+.legendText {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xl;
+}
+
+.emptyIcon {
+  font-size: 96rpx;
+  margin-bottom: $spacing-md;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}

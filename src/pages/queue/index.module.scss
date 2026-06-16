@@ -1,0 +1,265 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-lg $page-padding $spacing-xl;
+  box-sizing: border-box;
+}
+
+.section {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.titleIcon {
+  font-size: $font-size-lg;
+}
+
+.preferenceCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.preferenceList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+  margin-top: $spacing-md;
+}
+
+.preferenceItem {
+  @include button-reset;
+  background: $color-bg-page;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.preferenceSelected {
+  background: $color-bg-tag;
+  border-color: $color-primary;
+}
+
+.preferenceIcon {
+  font-size: 48rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.preferenceLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.preferenceDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+  text-align: center;
+}
+
+.actionsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+}
+
+.fleetSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.fleetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+}
+
+.fleetTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.fleetCount {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.shareBtn {
+  @include button-reset;
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-tag;
+  color: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  height: 56rpx;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.fleetList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.fleetItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.driverInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.driverAvatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  color: #fff;
+}
+
+.driverDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.driverName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.driverPlate {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
+.queueStatus {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.queueNum {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-primary;
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xl;
+}
+
+.emptyIcon {
+  font-size: 96rpx;
+  margin-bottom: $spacing-md;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: $font-size-md;
+  color: $color-text-tertiary;
+}
+
+.tipsCard {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-top: $spacing-lg;
+}
+
+.tipsTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary-dark;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.tipsContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}
+
+.simulateBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  border-radius: $radius-button;
+  color: #fff;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  margin-top: $spacing-lg;
+  box-shadow: 0 4rpx 16rpx rgba(76, 175, 80, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.leaveBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  background: $color-bg-card;
+  border: 2rpx solid $color-error;
+  border-radius: $radius-button;
+  color: $color-error;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  margin-top: $spacing-md;
+
+  &:active {
+    opacity: 0.8;
+    background: #ffebee;
+  }
+}

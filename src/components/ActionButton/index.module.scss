@@ -1,0 +1,63 @@
+@use '@/styles/variables.scss' as *;
+
+.actionButton {
+  @include button-reset;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  flex-direction: column;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+  width: 100%;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.icon {
+  font-size: 56rpx;
+  margin-bottom: $spacing-sm;
+}
+
+.label {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.description {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-align: center;
+}
+
+.primary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+
+  .label,
+  .description {
+    color: $color-text-white;
+  }
+}
+
+.warning {
+  background: linear-gradient(135deg, $color-warning 0%, #ffb74d 100%);
+
+  .label,
+  .description {
+    color: $color-text-white;
+  }
+}
+
+.danger {
+  background: linear-gradient(135deg, $color-error 0%, #ef5350 100%);
+
+  .label,
+  .description {
+    color: $color-text-white;
+  }
+}

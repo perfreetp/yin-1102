@@ -1,0 +1,200 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-lg $page-padding $spacing-xl;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-lg;
+}
+
+.title {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.unreadBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40rpx;
+  height: 40rpx;
+  padding: 0 $spacing-xs;
+  background: $color-error;
+  color: $color-text-white;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  margin-left: $spacing-xs;
+}
+
+.readAllBtn {
+  @include button-reset;
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-card;
+  color: $color-primary;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  height: 56rpx;
+  box-shadow: $shadow-card;
+
+  &:active {
+    opacity: 0.8;
+    background: $color-bg-hover;
+  }
+}
+
+.filterTabs {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+  overflow-x: auto;
+  @include scroll-x-container;
+}
+
+.filterTab {
+  @include button-reset;
+  @include scroll-x-item(auto);
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  box-shadow: $shadow-card;
+  height: 64rpx;
+  white-space: nowrap;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.filterTabActive {
+  background: $color-primary;
+  color: $color-text-white;
+}
+
+.tabCount {
+  margin-left: $spacing-xs;
+  opacity: 0.8;
+}
+
+.messagesList {
+  display: flex;
+  flex-direction: column;
+}
+
+.messageItem {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-sm;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.99);
+  }
+}
+
+.unread {
+  border-left: 6rpx solid $color-primary;
+  background: #f8faff;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+}
+
+.leftHeader {
+  display: flex;
+  align-items: center;
+}
+
+.typeTag {
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-button;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  margin-right: $spacing-sm;
+}
+
+.time {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.messageTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  @include text-ellipsis;
+}
+
+.messageContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  @include text-ellipsis-multi(2);
+}
+
+.unreadDot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: $color-error;
+  flex-shrink: 0;
+}
+
+.emptyState {
+  text-align: center;
+  padding: $spacing-xl * 2 $spacing-lg;
+}
+
+.emptyIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-md;
+  opacity: 0.4;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-xs;
+}
+
+.emptyDesc {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.callMessage {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border: 2rpx solid $color-warning;
+
+  .messageTitle {
+    color: $color-warning;
+  }
+}
+
+.overdueMessage {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border: 2rpx solid $color-error;
+
+  .messageTitle {
+    color: $color-error;
+  }
+}

@@ -1,0 +1,178 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-lg $page-padding $spacing-xl;
+  box-sizing: border-box;
+}
+
+.formCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.formItem {
+  margin-bottom: $spacing-lg;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.formLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.required {
+  color: $color-error;
+}
+
+.input {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 1rpx solid $color-border;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+}
+
+.picker {
+  width: 100%;
+  height: 88rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 1rpx solid $color-border;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pickerValue {
+  color: $color-text-primary;
+}
+
+.pickerPlaceholder {
+  color: $color-text-tertiary;
+}
+
+.pickerArrow {
+  color: $color-text-tertiary;
+  font-size: $font-size-md;
+}
+
+.switchRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md 0;
+}
+
+.switchLabel {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+}
+
+.deleteBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  background: $color-bg-card;
+  border: 2rpx solid $color-error;
+  border-radius: $radius-button;
+  color: $color-error;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  margin-top: $spacing-lg;
+
+  &:active {
+    background: #ffebee;
+  }
+}
+
+.submitBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  margin-top: $spacing-xl;
+  box-shadow: 0 8rpx 24rpx rgba(30, 136, 229, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.vehicleTypes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-sm;
+}
+
+.typeItem {
+  @include button-reset;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  height: 96rpx;
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+
+.typeItemSelected {
+  background: $color-bg-tag;
+  border-color: $color-primary;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.tipsCard {
+  background: #e3f2fd;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+}
+
+.tipsTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.tipsContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+}

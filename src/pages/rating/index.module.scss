@@ -1,0 +1,151 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  padding: $spacing-lg $page-padding $spacing-xl;
+  box-sizing: border-box;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: $spacing-xl;
+}
+
+.headerIcon {
+  font-size: 80rpx;
+  margin-bottom: $spacing-md;
+}
+
+.headerTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+}
+
+.headerSubtitle {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.ratingCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.ratingItem {
+  padding: $spacing-md 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  &:first-child {
+    padding-top: 0;
+  }
+}
+
+.ratingLabel {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.stars {
+  display: flex;
+  gap: $spacing-lg;
+}
+
+.star {
+  font-size: 56rpx;
+  color: #e0e0e0;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(1.2);
+  }
+}
+
+.starActive {
+  color: #ffc107;
+}
+
+.inputSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.inputTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 200rpx;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 1rpx solid $color-border;
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  box-sizing: border-box;
+}
+
+.quickTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.tag {
+  @include button-reset;
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-page;
+  border: 1rpx solid $color-border;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  height: 56rpx;
+
+  &:active {
+    background: $color-bg-tag;
+    border-color: $color-primary;
+    color: $color-primary;
+  }
+}
+
+.submitBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  margin-top: $spacing-lg;
+  box-shadow: 0 8rpx 24rpx rgba(30, 136, 229, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.submitBtnDisabled {
+  background: #bdbdbd;
+  box-shadow: none;
+}
