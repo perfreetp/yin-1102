@@ -330,3 +330,155 @@
     opacity: 0.9;
   }
 }
+
+.processTimeline {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  margin-bottom: $spacing-md;
+}
+
+.processStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  z-index: 1;
+}
+
+.processCircle {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: $color-bg-page;
+  border: 3rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: $spacing-sm;
+  transition: all $transition-base;
+}
+
+.processCircle.completed {
+  background: linear-gradient(135deg, $color-success 0%, #66bb6a 100%);
+  border-color: $color-success;
+}
+
+.processCircle.current {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-color: $color-primary;
+  transform: scale(1.1);
+  box-shadow: 0 4rpx 16rpx rgba(30, 136, 229, 0.3);
+}
+
+.processIcon {
+  font-size: 36rpx;
+}
+
+.processLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.processLabel.labelCompleted {
+  color: $color-success;
+  font-weight: $font-weight-medium;
+}
+
+.processLabel.labelCurrent {
+  color: $color-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.processLine {
+  position: absolute;
+  top: 40rpx;
+  left: calc(50% + 50rpx);
+  right: calc(-50% + 50rpx);
+  height: 4rpx;
+  background: $color-border;
+  z-index: 0;
+}
+
+.processLine.lineCompleted {
+  background: $color-success;
+}
+
+.nextStepHint {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  border-left: 6rpx solid $color-success;
+}
+
+.nextStepHeader {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.nextStepIcon {
+  font-size: $font-size-lg;
+}
+
+.nextStepTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-success;
+}
+
+.nextStepContent {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin-bottom: $spacing-sm;
+}
+
+.nextStepAction {
+  font-size: $font-size-sm;
+  color: $color-primary;
+  font-weight: $font-weight-medium;
+}
+
+.startChargingBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 8rpx 24rpx rgba(156, 39, 176, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.completeBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-success 0%, #66bb6a 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 8rpx 24rpx rgba(76, 175, 80, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}

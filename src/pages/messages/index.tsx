@@ -4,11 +4,10 @@ import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useQueueStore } from '@/store/useQueueStore';
-import MessageItem from '@/components/MessageItem';
 import { Message } from '@/types';
 import { getMessageTypeText, getMessageTypeColor, getMessageTypeBgColor } from '@/utils/format';
 
-type MessageFilter = 'all' | 'calling' | 'reminder' | 'overdue' | 'reroute' | 'system';
+type MessageFilter = 'all' | 'calling' | 'reminder' | 'overdue' | 'reroute' | 'system' | 'fleet';
 
 const MessagesPage: React.FC = () => {
   const { messages, markMessageRead, markAllMessagesRead } = useQueueStore();
@@ -30,7 +29,8 @@ const MessagesPage: React.FC = () => {
     { type: 'reminder', label: '提醒' },
     { type: 'overdue', label: '过号' },
     { type: 'reroute', label: '改道' },
-    { type: 'system', label: '系统' }
+    { type: 'system', label: '系统' },
+    { type: 'fleet', label: '车队' }
   ];
 
   const getFilterCount = (type: MessageFilter) => {
@@ -48,12 +48,28 @@ const MessagesPage: React.FC = () => {
     if (!message.read) {
       markMessageRead(message.id);
     }
-    Taro.showModal({
-      title: message.title,
-      content: message.content,
-      showCancel: false,
-      confirmText: '知道了'
-    });
+
+    if (message.pageUrl) {
+      console.log('[MessagesPage] navigate to:', message.pageUrl);
+      const isTabPage = message.pageUrl.startsWith('/pages/queue') || 
+                       message.pageUrl.startsWith('/pages/navigation') ||
+                       message.pageUrl.startsWith('/pages/messages') ||
+                       message.pageUrl.startsWith('/pages/profile') ||
+                       message.pageUrl.startsWith('/pages/home');
+      
+      if (isTabPage) {
+        Taro.switchTab({ url: message.pageUrl });
+      } else {
+        Taro.navigateTo({ url: message.pageUrl });
+      }
+    } else {
+      Taro.showModal({
+        title: message.title,
+        content: message.content,
+        showCancel: false,
+        confirmText: '知道了'
+      });
+    }
   };
 
   const handleMarkAllRead = () => {

@@ -4,21 +4,67 @@ import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useQueueStore } from '@/store/useQueueStore';
-import { chargingPreferences, oneClickActions, mockFleetMembers } from '@/data/mockQueue';
+import { chargingPreferences, oneClickActions } from '@/data/mockQueue';
 import QueueCard from '@/components/QueueCard';
 import ActionButton from '@/components/ActionButton';
 import StatusBadge from '@/components/StatusBadge';
-import { ChargingPreference, ActionReport } from '@/types';
-import { getPreferenceColor, formatWaitTime, formatTime } from '@/utils/format';
+import { ChargingPreference, ActionReport, QueueProcessStatus } from '@/types';
+import { getPreferenceColor, formatTime } from '@/utils/format';
 
 const QueuePage: React.FC = () => {
-  const { queueInfo, updatePreference, simulateQueueUpdate, leaveQueue, reportAction, clearActionReport, fleetMembers } = useQueueStore();
+  const { queueInfo, updatePreference, simulateQueueUpdate, leaveQueue, reportAction, clearActionReport, fleetMembers, updateProcessStatus } = useQueueStore();
   const [selectedPreference, setSelectedPreference] = useState<ChargingPreference>(
     queueInfo.chargingPreference
   );
   const [refreshing, setRefreshing] = useState(false);
 
   const isInQueue = queueInfo.status !== 'notInQueue';
+
+  const processSteps: { status: QueueProcessStatus; label: string; icon: string }[] = [
+    { status: 'queuing', label: '排队中', icon: '⏳' },
+    { status: 'calling', label: '叫号中', icon: '🔔' },
+    { status: 'arrived', label: '已到门口', icon: '🚚' },
+    { status: 'charging', label: '充电中', icon: '⚡' },
+    { status: 'completed', label: '已完成', icon: '✅' }
+  ];
+
+  const getNextStepHint = () => {
+    const hints: Record<QueueProcessStatus, { title: string; content: string; action?: string }> = {
+      notInQueue: { title: '尚未入队', content: '请扫描场站入口二维码加入排队' },
+      queuing: { title: '耐心等待', content: `前方还有${queueInfo.aheadCount}台车，预计等待${queueInfo.estimatedWaitTime}分钟，请保持APP在后台运行`, action: '可以先去休息区休息' },
+      calling: { title: '请立即前往', content: `您的${queueInfo.queueNumber}号已叫号，请在5分钟内到达B区充电区`, action: '点击"已到门口"上报到达' },
+      arrived: { title: '等待引导', content: '您已到达场站入口，请在原地等待工作人员引导入场', action: '如有需要可点击"协助倒车"' },
+      charging: { title: '充电中', content: '车辆正在充电中，请在休息区耐心等待', action: '充电完成后会自动通知您' },
+      completed: { title: '已完成', content: '本次充电已完成，祝您一路平安', action: '欢迎下次光临' }
+    };
+    return hints[queueInfo.processStatus] || hints.notInQueue;
+  };
+
+  const handleStartCharging = () => {
+    Taro.showModal({
+      title: '确认开始充电',
+      content: '确认车辆已停好并连接充电桩，开始充电？',
+      success: (res) => {
+        if (res.confirm) {
+          updateProcessStatus('charging');
+          Taro.showToast({ title: '开始充电', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const handleComplete = () => {
+    Taro.showModal({
+      title: '确认完成',
+      content: '确认充电已完成，准备离场？',
+      success: (res) => {
+        if (res.confirm) {
+          updateProcessStatus('completed');
+          Taro.showToast({ title: '已完成', icon: 'success' });
+        }
+      }
+    });
+  };
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -135,6 +181,72 @@ const QueuePage: React.FC = () => {
           <View className={styles.section}>
             <QueueCard queueInfo={queueInfo} />
           </View>
+
+          <View className={styles.section}>
+            <Text className={styles.sectionTitle}>
+              <Text className={styles.titleIcon}>📍</Text>
+              进站流程
+            </Text>
+            <View className={styles.processTimeline}>
+              {processSteps.map((step, index) => {
+                const currentIndex = processSteps.findIndex(s => s.status === queueInfo.processStatus);
+                const stepIndex = processSteps.findIndex(s => s.status === step.status);
+                const isCompleted = stepIndex < currentIndex || queueInfo.processStatus === 'completed';
+                const isCurrent = step.status === queueInfo.processStatus && queueInfo.processStatus !== 'notInQueue';
+
+                return (
+                  <View key={step.status} className={styles.processStep}>
+                    <View className={classnames(styles.processCircle, {
+                      [styles.completed]: isCompleted,
+                      [styles.current]: isCurrent
+                    })}>
+                      <Text className={styles.processIcon}>{step.icon}</Text>
+                    </View>
+                    <Text className={classnames(styles.processLabel, {
+                      [styles.labelCompleted]: isCompleted,
+                      [styles.labelCurrent]: isCurrent
+                    })}>
+                      {step.label}
+                    </Text>
+                    {index < processSteps.length - 1 && (
+                      <View className={classnames(styles.processLine, {
+                        [styles.lineCompleted]: index < currentIndex
+                      })} />
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+
+            {queueInfo.processStatus !== 'notInQueue' && (
+              <View className={styles.nextStepHint}>
+              <View className={styles.nextStepHeader}>
+                <Text className={styles.nextStepIcon}>💡</Text>
+                <Text className={styles.nextStepTitle}>{getNextStepHint().title}</Text>
+              </View>
+              <Text className={styles.nextStepContent}>{getNextStepHint().content}</Text>
+              {getNextStepHint().action && (
+                <Text className={styles.nextStepAction}>👉 {getNextStepHint().action}</Text>
+              )}
+            </View>
+          )}
+          </View>
+
+          {queueInfo.processStatus === 'arrived' && (
+            <View className={styles.section}>
+              <Button className={styles.startChargingBtn} onClick={handleStartCharging}>
+                ⚡ 车辆已就位，开始充电
+              </Button>
+            </View>
+          )}
+
+          {queueInfo.processStatus === 'charging' && (
+            <View className={styles.section}>
+              <Button className={styles.completeBtn} onClick={handleComplete}>
+                ✅ 充电完成，准备离场
+              </Button>
+            </View>
+          )}
 
           <View className={styles.section}>
             <Text className={styles.sectionTitle}>

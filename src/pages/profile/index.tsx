@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, Button, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useDidShow } from '@tarojs/taro';
@@ -9,21 +9,11 @@ import VehicleCard from '@/components/VehicleCard';
 import { Vehicle } from '@/types';
 
 const ProfilePage: React.FC = () => {
-  const { vehicles, currentVehicle, setCurrentVehicle, getUnreadCount } = useQueueStore();
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(currentVehicle);
-
-  useEffect(() => {
-    if (currentVehicle) {
-      setSelectedVehicle(currentVehicle);
-    }
-  }, [currentVehicle]);
+  const { vehicles, setDefaultVehicle, getUnreadCount } = useQueueStore();
 
   useDidShow(useCallback(() => {
     console.log('[ProfilePage] page did show, vehicles:', vehicles.length);
-    if (currentVehicle) {
-      setSelectedVehicle(currentVehicle);
-    }
-  }, [vehicles, currentVehicle]));
+  }, [vehicles]));
 
   const unreadCount = getUnreadCount();
 
@@ -39,9 +29,8 @@ const ProfilePage: React.FC = () => {
 
   const handleVehicleSelect = (vehicle: Vehicle) => {
     console.log('[ProfilePage] select vehicle:', vehicle.id);
-    setSelectedVehicle(vehicle);
-    setCurrentVehicle(vehicle);
-    Taro.showToast({ title: '已切换车辆', icon: 'success' });
+    setDefaultVehicle(vehicle.id);
+    Taro.showToast({ title: '已设为默认车辆', icon: 'success' });
   };
 
   const handleHistoryClick = (record: any) => {
@@ -133,7 +122,7 @@ const ProfilePage: React.FC = () => {
             <VehicleCard
               key={vehicle.id}
               vehicle={vehicle}
-              selected={selectedVehicle?.id === vehicle.id}
+              selected={vehicle.isDefault}
               onSelect={() => handleVehicleSelect(vehicle)}
               onEdit={() => handleVehicleEdit(vehicle)}
             />

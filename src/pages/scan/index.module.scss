@@ -101,4 +101,182 @@
     opacity: 0.9;
     transform: scale(0.98);
   }
+
+  &:disabled {
+    opacity: 0.6;
+    background: $color-text-disabled;
+    box-shadow: none;
+  }
+}
+
+.resultContainer {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: $spacing-xl;
+}
+
+.resultCard {
+  width: 100%;
+  background: $color-bg-card;
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  box-shadow: $shadow-card;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+}
+
+.resultIcon {
+  font-size: 120rpx;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.resultTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-lg;
+  display: block;
+}
+
+.resultContent {
+  text-align: left;
+  background: $color-bg-page;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+}
+
+.resultRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.resultLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+  margin-right: $spacing-md;
+}
+
+.resultValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  text-align: right;
+  flex: 1;
+  word-break: break-all;
+}
+
+.successText {
+  color: $color-success;
+  font-weight: $font-weight-medium;
+}
+
+.errorText {
+  color: $color-error;
+  font-weight: $font-weight-medium;
+}
+
+.stationInfo {
+  margin-top: $spacing-lg;
+  padding-top: $spacing-lg;
+  border-top: 1rpx solid $color-border;
+}
+
+.stationHeader {
+  margin-bottom: $spacing-md;
+}
+
+.stationName {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.stationDetail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-sm;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.stationDetailLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.stationDetailValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  text-align: right;
+  max-width: 60%;
+}
+
+.resultActions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.confirmBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-success 0%, #66bb6a 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 8rpx 24rpx rgba(76, 175, 80, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.retryBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 8rpx 24rpx rgba(30, 136, 229, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.backBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  color: $color-text-secondary;
+  font-size: $font-size-lg;
+  border: 2rpx solid $color-border;
+
+  &:active {
+    opacity: 0.9;
+    background: $color-bg-page;
+  }
 }

@@ -1,3 +1,5 @@
+export type QueueProcessStatus = 'queuing' | 'calling' | 'arrived' | 'charging' | 'completed' | 'notInQueue';
+
 export interface QueueInfo {
   id: string;
   stationName: string;
@@ -6,12 +8,16 @@ export interface QueueInfo {
   aheadCount: number;
   estimatedWaitTime: number;
   status: 'waiting' | 'calling' | 'overdue' | 'completed' | 'notInQueue';
+  processStatus: QueueProcessStatus;
   joinTime: string;
   estimatedCallTime: string;
   chargingPreference: ChargingPreference;
   currentCalledNumber: number;
   totalInQueue: number;
   currentAction?: ActionReport | null;
+  arriveTime?: string;
+  chargingStartTime?: string;
+  completeTime?: string;
 }
 
 export interface Station {
@@ -56,12 +62,13 @@ export interface FleetMember {
 
 export interface Message {
   id: string;
-  type: 'calling' | 'reminder' | 'overdue' | 'reroute' | 'system';
+  type: 'calling' | 'reminder' | 'overdue' | 'reroute' | 'system' | 'fleet';
   title: string;
   content: string;
   time: string;
   read: boolean;
   queueNumber?: number;
+  pageUrl?: string;
 }
 
 export interface Vehicle {

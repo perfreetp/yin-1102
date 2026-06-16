@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useDidShow } from '@tarojs/taro';
@@ -8,7 +8,7 @@ import { useQueueStore } from '@/store/useQueueStore';
 import { FleetMember } from '@/types';
 
 const FleetPage: React.FC = () => {
-  const { fleetMembers, fleetCode, addFleetMember, inviteFleetMember, updateFleetMemberStatus } = useQueueStore();
+  const { fleetMembers, fleetCode, addFleetMember, inviteFleetMember } = useQueueStore();
   const [hasFleet, setHasFleet] = useState(true);
 
   useDidShow(useCallback(() => {
@@ -48,9 +48,9 @@ const FleetPage: React.FC = () => {
     console.log('[FleetPage] add member');
     Taro.showModal({
       title: '添加队员',
-      editable: true,
+      editable: true as any,
       placeholderText: '请输入队员的车队码',
-      success: (res) => {
+      success: (res: any) => {
         if (res.confirm && res.content) {
           const result = addFleetMember(res.content);
           if (result.success) {
@@ -65,7 +65,7 @@ const FleetPage: React.FC = () => {
           }
         }
       }
-    });
+    } as any);
   };
 
   const handleMemberClick = (member: FleetMember) => {
@@ -136,8 +136,6 @@ const FleetPage: React.FC = () => {
   };
 
   const waitingCount = fleetMembers.filter((m) => m.status === 'waiting').length;
-  const callingCount = fleetMembers.filter((m) => m.status === 'calling').length;
-  const completedCount = fleetMembers.filter((m) => m.status === 'completed').length;
   const pendingCount = fleetMembers.filter((m) => m.memberStatus === 'pending').length;
 
   return (

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { QueueInfo, ChargingPreference, Message, Vehicle, Station, FleetMember, ActionReport } from '@/types';
+import { QueueInfo, ChargingPreference, Message, Vehicle, Station, FleetMember, ActionReport, QueueProcessStatus } from '@/types';
 import { mockQueueInfo, mockNotInQueue, mockFleetMembers } from '@/data/mockQueue';
 import { mockMessages } from '@/data/mockMessages';
 import { mockVehicles } from '@/data/mockVehicles';
@@ -20,6 +20,7 @@ interface QueueState {
   markAllMessagesRead: () => void;
   addMessage: (msg: Message) => void;
   setCurrentVehicle: (vehicle: Vehicle) => void;
+  setDefaultVehicle: (vehicleId: string) => void;
   getUnreadCount: () => number;
   simulateQueueUpdate: () => void;
   validateStationCode: (code: string) => { success: boolean; station?: Station; message: string };
@@ -31,6 +32,7 @@ interface QueueState {
   addFleetMember: (code: string) => { success: boolean; message: string; member?: FleetMember };
   inviteFleetMember: () => string;
   updateFleetMemberStatus: (id: string, status: 'pending' | 'accepted' | 'rejected') => void;
+  updateProcessStatus: (status: QueueProcessStatus) => void;
 }
 
 export const useQueueStore = create<QueueState>((set, get) => ({
@@ -54,7 +56,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
 
   updatePreference: (pref) => set((state) => ({
     queueInfo: { ...state.queueInfo, chargingPreference: pref }
-  }),
+  })),
 
   joinQueue: (stationId, stationName) => {
     const newQueueNumber = Math.floor(Math.random() * 50) + 30;
@@ -66,6 +68,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       aheadCount: Math.floor(Math.random() * 10) + 3,
       estimatedWaitTime: Math.floor(Math.random() * 60) + 20,
       status: 'waiting',
+      processStatus: 'queuing',
       joinTime: new Date().toISOString(),
       estimatedCallTime: new Date(Date.now() + 45 * 60 * 1000).toISOString(),
       chargingPreference: { type: 'normal', label: '普通安排' },
@@ -74,6 +77,18 @@ export const useQueueStore = create<QueueState>((set, get) => ({
     };
     console.log('[QueueStore] joinQueue:', newQueueInfo);
     set({ queueInfo: newQueueInfo });
+
+    const joinMsg: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'system',
+      title: '入队成功',
+      content: `您已成功加入${stationName}，排队号：${newQueueNumber}号，前方有${newQueueNumber - newQueueInfo.currentCalledNumber}台车。`,
+      time: new Date().toISOString(),
+      read: false,
+      queueNumber: newQueueNumber,
+      pageUrl: '/pages/queue/index'
+    };
+    get().addMessage(joinMsg);
   },
 
   leaveQueue: () => {
@@ -97,6 +112,21 @@ export const useQueueStore = create<QueueState>((set, get) => ({
 
   setCurrentVehicle: (vehicle) => set({ currentVehicle: vehicle }),
 
+  setDefaultVehicle: (vehicleId) => {
+    console.log('[QueueStore] setDefaultVehicle:', vehicleId);
+    set((state) => {
+      const updatedVehicles = state.vehicles.map(v => ({
+        ...v,
+        isDefault: v.id === vehicleId
+      }));
+      const newDefault = updatedVehicles.find(v => v.id === vehicleId);
+      return {
+        vehicles: updatedVehicles,
+        currentVehicle: newDefault || state.currentVehicle
+      };
+    });
+  },
+
   getUnreadCount: () => {
     return get().messages.filter(m => !m.read).length;
   },
@@ -108,10 +138,12 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       const newCalledNumber = state.queueInfo.currentCalledNumber + 1;
       const newStatus = newAheadCount === 0 ? 'calling' : 'waiting';
       const newEstimatedTime = newAheadCount * 8;
+      const newProcessStatus = newAheadCount === 0 ? 'calling' : state.queueInfo.processStatus;
 
       console.log('[QueueStore] simulateQueueUpdate:', {
         aheadCount: newAheadCount,
         status: newStatus,
+        processStatus: newProcessStatus,
         estimatedWaitTime: newEstimatedTime
       });
 
@@ -121,7 +153,8 @@ export const useQueueStore = create<QueueState>((set, get) => ({
           aheadCount: newAheadCount,
           currentCalledNumber: newCalledNumber,
           estimatedWaitTime: newEstimatedTime,
-          status: newStatus
+          status: newStatus,
+          processStatus: newProcessStatus
         }
       });
 
@@ -131,9 +164,10 @@ export const useQueueStore = create<QueueState>((set, get) => ({
           type: 'reminder',
           title: '即将叫号提醒',
           content: `您好，您前面还有2台车，预计15分钟后叫号，请做好准备。`,
-          time: new Date().toLocaleString(),
+          time: new Date().toISOString(),
           read: false,
-          queueNumber: state.queueInfo.queueNumber
+          queueNumber: state.queueInfo.queueNumber,
+          pageUrl: '/pages/queue/index'
         };
         get().addMessage(reminderMsg);
       }
@@ -144,9 +178,10 @@ export const useQueueStore = create<QueueState>((set, get) => ({
           type: 'calling',
           title: '正式叫号',
           content: `${state.queueInfo.queueNumber}号车请前往B区充电区，5分钟内未到将过号。`,
-          time: new Date().toLocaleString(),
+          time: new Date().toISOString(),
           read: false,
-          queueNumber: state.queueInfo.queueNumber
+          queueNumber: state.queueInfo.queueNumber,
+          pageUrl: '/pages/queue/index'
         };
         get().addMessage(callingMsg);
       }
@@ -265,14 +300,18 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       reportTime: new Date().toISOString(),
       status: 'pending'
     };
-    
+
     set((state) => ({
       queueInfo: {
         ...state.queueInfo,
         currentAction: actionReport
       }
     }));
-    
+
+    if (type === 'arrived') {
+      get().updateProcessStatus('arrived');
+    }
+
     setTimeout(() => {
       set((state) => ({
         queueInfo: {
@@ -282,6 +321,35 @@ export const useQueueStore = create<QueueState>((set, get) => ({
             : null
         }
       }));
+
+      const actionMessages: Record<string, { title: string; content: string }> = {
+        arrived: {
+          title: '场站已确认',
+          content: `您的"已到门口"上报已确认，请在场站入口等待工作人员引导。`
+        },
+        leave: {
+          title: '场站已确认',
+          content: `您的"临时离开"上报已确认，将为您保留位置5分钟，请尽快返回。`
+        },
+        reverse: {
+          title: '场站已响应',
+          content: `您的"协助倒车"请求已收到，工作人员正在赶来，请在原地等待。`
+        }
+      };
+
+      const msg = actionMessages[type];
+      if (msg) {
+        const reportMsg: Message = {
+          id: `msg-${Date.now()}`,
+          type: 'system',
+          title: msg.title,
+          content: msg.content,
+          time: new Date().toISOString(),
+          read: false,
+          pageUrl: '/pages/queue/index'
+        };
+        get().addMessage(reportMsg);
+      }
     }, 3000);
   },
 
@@ -335,7 +403,29 @@ export const useQueueStore = create<QueueState>((set, get) => ({
           m.id === newMember.id ? { ...m, memberStatus: 'accepted' as const } : m
         )
       }));
+
+      const fleetMsg: Message = {
+        id: `msg-${Date.now()}`,
+        type: 'fleet',
+        title: '队友加入成功',
+        content: `${newMember.driverName}（${newMember.plateNumber}）已加入您的车队，当前排队${newMember.queueNumber}号。`,
+        time: new Date().toISOString(),
+        read: false,
+        pageUrl: '/pages/fleet/index'
+      };
+      get().addMessage(fleetMsg);
     }, 5000);
+    
+    const pendingMsg: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'fleet',
+      title: '车队邀请已发送',
+      content: `已向车队码${code}发送加入请求，等待队长确认中。`,
+      time: new Date().toISOString(),
+      read: false,
+      pageUrl: '/pages/fleet/index'
+    };
+    get().addMessage(pendingMsg);
     
     return { success: true, message: '已发送加入请求，等待队长确认', member: newMember };
   },
@@ -353,5 +443,29 @@ export const useQueueStore = create<QueueState>((set, get) => ({
         m.id === id ? { ...m, memberStatus: status } : m
       )
     }));
+  },
+
+  updateProcessStatus: (status) => {
+    console.log('[QueueStore] updateProcessStatus:', status);
+    set((state) => {
+      const updates: Partial<QueueInfo> = { processStatus: status };
+      const now = new Date().toISOString();
+
+      if (status === 'arrived') {
+        updates.arriveTime = now;
+      } else if (status === 'charging') {
+        updates.chargingStartTime = now;
+      } else if (status === 'completed') {
+        updates.completeTime = now;
+        updates.status = 'completed';
+      }
+
+      return {
+        queueInfo: {
+          ...state.queueInfo,
+          ...updates
+        }
+      };
+    });
   }
 }));

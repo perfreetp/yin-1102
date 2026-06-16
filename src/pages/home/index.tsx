@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, Button, ScrollView, Swiper, SwiperItem } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import styles from './index.module.scss';
@@ -6,16 +6,10 @@ import { useQueueStore } from '@/store/useQueueStore';
 import { quickActions, notificationList } from '@/data/mockQueue';
 import { stationInfo } from '@/data/mockNavigation';
 import QueueCard from '@/components/QueueCard';
-import { getStatusText } from '@/utils/format';
 
 const HomePage: React.FC = () => {
   const { queueInfo, currentVehicle, simulateQueueUpdate, getUnreadCount } = useQueueStore();
-  const [currentNotice, setCurrentNotice] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    console.log('[HomePage] mounted, queueStatus:', queueInfo.status);
-  }, [queueInfo.status]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -77,7 +71,6 @@ const HomePage: React.FC = () => {
           circular
           vertical
           interval={3000}
-          onChange={(e) => setCurrentNotice(e.detail.current)}
         >
           {notificationList.map((notice) => (
             <SwiperItem key={notice.id}>

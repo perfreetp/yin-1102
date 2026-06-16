@@ -9,7 +9,6 @@ interface VehicleCardProps {
   selected?: boolean;
   onSelect?: () => void;
   onEdit?: () => void;
-  onDelete?: () => void;
   showActions?: boolean;
 }
 
@@ -18,7 +17,6 @@ const VehicleCard: React.FC<VehicleCardProps> = ({
   selected = false,
   onSelect,
   onEdit,
-  onDelete,
   showActions = true
 }) => {
   const { plateNumber, vehicleType, weight, length, isDefault } = vehicle;

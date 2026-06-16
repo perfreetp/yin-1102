@@ -20,7 +20,6 @@ const QueueCard: React.FC<QueueCardProps> = ({ queueInfo, className }) => {
     joinTime,
     estimatedCallTime,
     chargingPreference,
-    currentCalledNumber,
     totalInQueue
   } = queueInfo;
 

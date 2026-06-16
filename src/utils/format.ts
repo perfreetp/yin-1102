@@ -72,7 +72,8 @@ export const getMessageTypeText = (type: string): string => {
     reminder: '提醒',
     overdue: '过号',
     reroute: '改道',
-    system: '系统'
+    system: '系统',
+    fleet: '车队'
   };
   return typeMap[type] || type;
 };
@@ -83,7 +84,8 @@ export const getMessageTypeColor = (type: string): string => {
     reminder: '#1e88e5',
     overdue: '#f44336',
     reroute: '#9c27b0',
-    system: '#4caf50'
+    system: '#4caf50',
+    fleet: '#00bcd4'
   };
   return colorMap[type] || '#8e8e93';
 };
@@ -94,7 +96,8 @@ export const getMessageTypeBgColor = (type: string): string => {
     reminder: '#e3f2fd',
     overdue: '#ffebee',
     reroute: '#f3e5f5',
-    system: '#e8f5e9'
+    system: '#e8f5e9',
+    fleet: '#e0f7fa'
   };
   return colorMap[type] || '#f5f5f5';
 };
