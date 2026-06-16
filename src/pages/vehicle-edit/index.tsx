@@ -18,7 +18,7 @@ const vehicleTypeOptions = [
 
 const VehicleEditPage: React.FC = () => {
   const router = useRouter();
-  const { vehicles, setCurrentVehicle } = useQueueStore();
+  const { vehicles, addVehicle, updateVehicle, deleteVehicle } = useQueueStore();
   const [formData, setFormData] = useState<Partial<Vehicle>>({
     plateNumber: '',
     vehicleType: '',
@@ -60,11 +60,22 @@ const VehicleEditPage: React.FC = () => {
 
     console.log('[VehicleEditPage] submit:', formData);
 
-    if (formData.isDefault && formData.id) {
-      const vehicle = vehicles.find((v) => v.id === formData.id);
-      if (vehicle) {
-        setCurrentVehicle(vehicle);
-      }
+    if (isEdit && formData.id) {
+      updateVehicle(formData.id, {
+        plateNumber: formData.plateNumber,
+        vehicleType: formData.vehicleType,
+        weight: formData.weight,
+        length: formData.length,
+        isDefault: formData.isDefault
+      });
+    } else {
+      addVehicle({
+        plateNumber: formData.plateNumber!,
+        vehicleType: formData.vehicleType!,
+        weight: formData.weight || '',
+        length: formData.length || '',
+        isDefault: formData.isDefault || false
+      });
     }
 
     Taro.showToast({
@@ -79,11 +90,12 @@ const VehicleEditPage: React.FC = () => {
   const handleDelete = () => {
     Taro.showModal({
       title: '确认删除',
-      content: '确定要删除该车辆信息吗？',
+      content: '确定要删除该车辆信息吗？删除后将无法恢复。',
       confirmColor: '#f44336',
       success: (res) => {
-        if (res.confirm) {
+        if (res.confirm && formData.id) {
           console.log('[VehicleEditPage] delete vehicle:', formData.id);
+          deleteVehicle(formData.id);
           Taro.showToast({ title: '删除成功', icon: 'success' });
           setTimeout(() => {
             Taro.navigateBack();

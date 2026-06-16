@@ -1,20 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, Button } from '@tarojs/components';
 import Taro from '@tarojs/taro';
+import { useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
-import { mockFleetMembers } from '@/data/mockQueue';
+import { useQueueStore } from '@/store/useQueueStore';
 import { FleetMember } from '@/types';
 
 const FleetPage: React.FC = () => {
-  const [members, setMembers] = useState<FleetMember[]>(mockFleetMembers);
+  const { fleetMembers, fleetCode, addFleetMember, inviteFleetMember, updateFleetMemberStatus } = useQueueStore();
   const [hasFleet, setHasFleet] = useState(true);
-  const fleetCode = '88235';
+
+  useDidShow(useCallback(() => {
+    console.log('[FleetPage] page did show, members:', fleetMembers.length);
+  }, [fleetMembers]));
 
   const handleCopyCode = () => {
     console.log('[FleetPage] copy fleet code');
+    const code = inviteFleetMember();
     Taro.setClipboardData({
-      data: fleetCode,
+      data: code,
       success: () => {
         Taro.showToast({ title: '车队码已复制', icon: 'success' });
       }
@@ -23,7 +28,20 @@ const FleetPage: React.FC = () => {
 
   const handleShare = () => {
     console.log('[FleetPage] share fleet');
-    Taro.showToast({ title: '分享功能开发中', icon: 'none' });
+    const code = inviteFleetMember();
+    const shareText = `🚚 我正在使用重卡排队助手，快来加入我的车队吧！\n车队码：${code}\n加入后可以实时查看彼此的排队进度。`;
+    
+    Taro.setClipboardData({
+      data: shareText,
+      success: () => {
+        Taro.showModal({
+          title: '邀请信息已复制',
+          content: `车队码：${code}\n\n邀请信息已复制到剪贴板，您可以粘贴发送给队友。`,
+          showCancel: false,
+          confirmText: '我知道了'
+        });
+      }
+    });
   };
 
   const handleAddMember = () => {
@@ -34,7 +52,17 @@ const FleetPage: React.FC = () => {
       placeholderText: '请输入队员的车队码',
       success: (res) => {
         if (res.confirm && res.content) {
-          Taro.showToast({ title: '已发送邀请', icon: 'success' });
+          const result = addFleetMember(res.content);
+          if (result.success) {
+            Taro.showToast({ title: result.message, icon: 'success' });
+          } else {
+            Taro.showModal({
+              title: '添加失败',
+              content: result.message,
+              showCancel: false,
+              confirmText: '我知道了'
+            });
+          }
         }
       }
     });
@@ -81,9 +109,36 @@ const FleetPage: React.FC = () => {
     }
   };
 
-  const waitingCount = members.filter((m) => m.status === 'waiting').length;
-  const callingCount = members.filter((m) => m.status === 'calling').length;
-  const completedCount = members.filter((m) => m.status === 'completed').length;
+  const getMemberStatusClass = (memberStatus: string) => {
+    switch (memberStatus) {
+      case 'pending':
+        return styles.statusPending;
+      case 'accepted':
+        return styles.statusAccepted;
+      case 'rejected':
+        return styles.statusRejected;
+      default:
+        return '';
+    }
+  };
+
+  const getMemberStatusText = (memberStatus: string) => {
+    switch (memberStatus) {
+      case 'pending':
+        return '等待确认';
+      case 'accepted':
+        return '已加入';
+      case 'rejected':
+        return '已拒绝';
+      default:
+        return memberStatus;
+    }
+  };
+
+  const waitingCount = fleetMembers.filter((m) => m.status === 'waiting').length;
+  const callingCount = fleetMembers.filter((m) => m.status === 'calling').length;
+  const completedCount = fleetMembers.filter((m) => m.status === 'completed').length;
+  const pendingCount = fleetMembers.filter((m) => m.memberStatus === 'pending').length;
 
   return (
     <View className={styles.page}>
@@ -104,7 +159,7 @@ const FleetPage: React.FC = () => {
             </View>
             <View className={styles.fleetStats}>
               <View className={styles.statItem}>
-                <Text className={styles.statValue}>{members.length}</Text>
+                <Text className={styles.statValue}>{fleetMembers.length}</Text>
                 <Text className={styles.statLabel}>总人数</Text>
               </View>
               <View className={styles.statItem}>
@@ -112,8 +167,8 @@ const FleetPage: React.FC = () => {
                 <Text className={styles.statLabel}>排队中</Text>
               </View>
               <View className={styles.statItem}>
-                <Text className={styles.statValue}>{completedCount}</Text>
-                <Text className={styles.statLabel}>已完成</Text>
+                <Text className={styles.statValue}>{pendingCount}</Text>
+                <Text className={styles.statLabel}>待确认</Text>
               </View>
             </View>
           </View>
@@ -129,7 +184,7 @@ const FleetPage: React.FC = () => {
               </Button>
             </View>
             <View className={styles.membersList}>
-              {members.map((member) => (
+              {fleetMembers.map((member) => (
                 <View
                   key={member.id}
                   className={styles.memberItem}
@@ -146,10 +201,18 @@ const FleetPage: React.FC = () => {
                   </View>
                   <View className={styles.memberStatus}>
                     <Text className={styles.queueNumber}>#{member.queueNumber}</Text>
-                    <View
-                      className={classnames(styles.statusBadge, getStatusClass(member.status))}
-                    >
-                      {getStatusText(member.status)}
+                    <View style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                      <View
+                        className={classnames(styles.statusBadge, getStatusClass(member.status))}
+                      >
+                        {getStatusText(member.status)}
+                      </View>
+                      <View
+                        className={classnames(styles.statusBadge, getMemberStatusClass(member.memberStatus))}
+                      >
+                        {member.memberStatus === 'pending' ? '⏳ ' : member.memberStatus === 'accepted' ? '✓ ' : '✕ '}
+                        {getMemberStatusText(member.memberStatus)}
+                      </View>
                     </View>
                   </View>
                 </View>

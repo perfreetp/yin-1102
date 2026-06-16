@@ -211,6 +211,21 @@
   color: $color-primary;
 }
 
+.statusPending {
+  background: #fff8e1;
+  color: #f57c00;
+}
+
+.statusAccepted {
+  background: #e8f5e9;
+  color: $color-success;
+}
+
+.statusRejected {
+  background: #ffebee;
+  color: $color-error;
+}
+
 .emptyState {
   text-align: center;
   padding: $spacing-xl * 2 $spacing-lg;

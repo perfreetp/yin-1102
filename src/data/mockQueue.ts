@@ -67,28 +67,40 @@ export const mockFleetMembers: FleetMember[] = [
     driverName: '张师傅',
     plateNumber: '京A·D88235',
     queueNumber: 35,
-    status: 'waiting'
+    status: 'waiting',
+    memberStatus: 'accepted',
+    joinTime: new Date(Date.now() - 3600000).toISOString(),
+    fleetCode: '88235'
   },
   {
     id: '2',
     driverName: '李师傅',
     plateNumber: '京A·D78921',
     queueNumber: 42,
-    status: 'waiting'
+    status: 'waiting',
+    memberStatus: 'accepted',
+    joinTime: new Date(Date.now() - 7200000).toISOString(),
+    fleetCode: '88235'
   },
   {
     id: '3',
     driverName: '王师傅',
     plateNumber: '京A·D56789',
     queueNumber: 31,
-    status: 'calling'
+    status: 'calling',
+    memberStatus: 'accepted',
+    joinTime: new Date(Date.now() - 1800000).toISOString(),
+    fleetCode: '88235'
   },
   {
     id: '4',
     driverName: '赵师傅',
     plateNumber: '京A·D12345',
     queueNumber: 28,
-    status: 'completed'
+    status: 'completed',
+    memberStatus: 'accepted',
+    joinTime: new Date(Date.now() - 10800000).toISOString(),
+    fleetCode: '88235'
   }
 ];
 

@@ -8,11 +8,11 @@ import { chargingPreferences, oneClickActions, mockFleetMembers } from '@/data/m
 import QueueCard from '@/components/QueueCard';
 import ActionButton from '@/components/ActionButton';
 import StatusBadge from '@/components/StatusBadge';
-import { ChargingPreference } from '@/types';
-import { getPreferenceColor, formatWaitTime } from '@/utils/format';
+import { ChargingPreference, ActionReport } from '@/types';
+import { getPreferenceColor, formatWaitTime, formatTime } from '@/utils/format';
 
 const QueuePage: React.FC = () => {
-  const { queueInfo, updatePreference, simulateQueueUpdate, leaveQueue } = useQueueStore();
+  const { queueInfo, updatePreference, simulateQueueUpdate, leaveQueue, reportAction, clearActionReport, fleetMembers } = useQueueStore();
   const [selectedPreference, setSelectedPreference] = useState<ChargingPreference>(
     queueInfo.chargingPreference
   );
@@ -36,7 +36,7 @@ const QueuePage: React.FC = () => {
     Taro.showToast({ title: `已设置为${pref.label}`, icon: 'success' });
   };
 
-  const handleOneClickAction = (type: string, label: string) => {
+  const handleOneClickAction = (type: 'arrived' | 'leave' | 'reverse', label: string) => {
     console.log('[QueuePage] one click action:', type);
     Taro.showModal({
       title: '确认操作',
@@ -44,10 +44,42 @@ const QueuePage: React.FC = () => {
       success: (res) => {
         if (res.confirm) {
           console.log('[QueuePage] action confirmed:', type);
-          Taro.showToast({ title: '已上报', icon: 'success' });
+          reportAction(type, label);
+          Taro.showToast({ title: '已上报，等待场站确认', icon: 'none' });
         }
       }
     });
+  };
+
+  const handleClearAction = () => {
+    Taro.showModal({
+      title: '确认取消',
+      content: '确定要取消当前上报状态吗？',
+      success: (res) => {
+        if (res.confirm) {
+          clearActionReport();
+          Taro.showToast({ title: '已取消', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const getActionStatusText = (action: ActionReport) => {
+    const statusMap: Record<string, { text: string; icon: string; color: string }> = {
+      pending: { text: '等待场站确认', icon: '⏳', color: '#ff9800' },
+      confirmed: { text: '场站已确认收到', icon: '✓', color: '#4caf50' },
+      completed: { text: '已处理完成', icon: '✅', color: '#2196f3' }
+    };
+    return statusMap[action.status] || statusMap.pending;
+  };
+
+  const getActionIcon = (type: string) => {
+    const icons: Record<string, string> = {
+      arrived: '🚚',
+      leave: '⏸️',
+      reverse: '🆘'
+    };
+    return icons[type] || '📌';
   };
 
   const handleShareFleet = () => {
@@ -136,6 +168,38 @@ const QueuePage: React.FC = () => {
             </View>
           </View>
 
+          {queueInfo.currentAction && (
+            <View className={styles.section}>
+              <View className={styles.actionStatusCard}>
+                <View className={styles.actionStatusHeader}>
+                  <View className={styles.actionStatusInfo}>
+                    <Text className={styles.actionStatusIcon}>
+                      {getActionIcon(queueInfo.currentAction.type)}
+                    </Text>
+                    <View>
+                      <Text className={styles.actionStatusLabel}>
+                        {queueInfo.currentAction.label}
+                      </Text>
+                      <Text className={styles.actionStatusTime}>
+                        上报时间：{formatTime(queueInfo.currentAction.reportTime)}
+                      </Text>
+                    </View>
+                  </View>
+                  <View
+                    className={styles.actionStatusBadge}
+                    style={{ backgroundColor: `${getActionStatusText(queueInfo.currentAction).color}15`, color: getActionStatusText(queueInfo.currentAction).color }}
+                  >
+                    <Text>{getActionStatusText(queueInfo.currentAction).icon}</Text>
+                    <Text style={{ marginLeft: 8 }}>{getActionStatusText(queueInfo.currentAction).text}</Text>
+                  </View>
+                </View>
+                <Button className={styles.actionClearBtn} onClick={handleClearAction}>
+                  取消上报
+                </Button>
+              </View>
+            </View>
+          )}
+
           <View className={styles.section}>
             <Text className={styles.sectionTitle}>
               <Text className={styles.titleIcon}>📌</Text>
@@ -147,9 +211,10 @@ const QueuePage: React.FC = () => {
                   key={action.id}
                   icon={action.icon}
                   label={action.label}
-                  description={action.description}
+                  description={queueInfo.currentAction ? '已有待处理上报' : action.description}
                   variant={action.type === 'reverse' ? 'danger' : action.type === 'arrived' ? 'primary' : 'warning'}
                   onClick={() => handleOneClickAction(action.type, action.label)}
+                  disabled={!!queueInfo.currentAction}
                 />
               ))}
             </View>
@@ -163,14 +228,14 @@ const QueuePage: React.FC = () => {
                   同行车队
                 </Text>
                 <View style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                  <Text className={styles.fleetCount}>共{mockFleetMembers.length}人</Text>
+                  <Text className={styles.fleetCount}>共{fleetMembers.length}人</Text>
                   <Button className={styles.shareBtn} onClick={handleShareFleet}>
                     邀请队友
                   </Button>
                 </View>
               </View>
               <View className={styles.fleetList}>
-                {mockFleetMembers.map((member) => (
+                {fleetMembers.map((member) => (
                   <View key={member.id} className={styles.fleetItem}>
                     <View className={styles.driverInfo}>
                       <View className={styles.driverAvatar}>

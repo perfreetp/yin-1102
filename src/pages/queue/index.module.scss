@@ -263,3 +263,70 @@
     background: #ffebee;
   }
 }
+
+.actionStatusCard {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  border: 2rpx solid #ffc107;
+}
+
+.actionStatusHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: $spacing-md;
+}
+
+.actionStatusInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex: 1;
+}
+
+.actionStatusIcon {
+  font-size: 48rpx;
+  flex-shrink: 0;
+}
+
+.actionStatusLabel {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.actionStatusTime {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.actionStatusBadge {
+  padding: $spacing-xs $spacing-md;
+  border-radius: $radius-button;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.actionClearBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2rpx solid #ffc107;
+  border-radius: $radius-button;
+  color: #f57c00;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: rgba(255, 255, 255, 1);
+    opacity: 0.9;
+  }
+}

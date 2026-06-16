@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, Button, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
+import { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { useQueueStore } from '@/store/useQueueStore';
 import { mockHistoryRecords } from '@/data/mockVehicles';
@@ -10,6 +11,19 @@ import { Vehicle } from '@/types';
 const ProfilePage: React.FC = () => {
   const { vehicles, currentVehicle, setCurrentVehicle, getUnreadCount } = useQueueStore();
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(currentVehicle);
+
+  useEffect(() => {
+    if (currentVehicle) {
+      setSelectedVehicle(currentVehicle);
+    }
+  }, [currentVehicle]);
+
+  useDidShow(useCallback(() => {
+    console.log('[ProfilePage] page did show, vehicles:', vehicles.length);
+    if (currentVehicle) {
+      setSelectedVehicle(currentVehicle);
+    }
+  }, [vehicles, currentVehicle]));
 
   const unreadCount = getUnreadCount();
 

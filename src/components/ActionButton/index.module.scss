@@ -61,3 +61,15 @@
     color: $color-text-white;
   }
 }
+
+.disabled {
+  opacity: 0.5;
+  filter: grayscale(50%);
+  pointer-events: none;
+
+  &:active {
+    opacity: 0.5;
+    transform: none;
+    box-shadow: $shadow-card;
+  }
+}

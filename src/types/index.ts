@@ -11,6 +11,23 @@ export interface QueueInfo {
   chargingPreference: ChargingPreference;
   currentCalledNumber: number;
   totalInQueue: number;
+  currentAction?: ActionReport | null;
+}
+
+export interface Station {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  totalChargingPorts: number;
+  availablePorts: number;
+}
+
+export interface ActionReport {
+  type: 'arrived' | 'leave' | 'reverse';
+  label: string;
+  reportTime: string;
+  status: 'pending' | 'confirmed' | 'completed';
 }
 
 export interface ChargingPreference {
@@ -32,6 +49,9 @@ export interface FleetMember {
   plateNumber: string;
   queueNumber: number;
   status: 'waiting' | 'calling' | 'completed';
+  memberStatus: 'pending' | 'accepted' | 'rejected';
+  joinTime: string;
+  fleetCode?: string;
 }
 
 export interface Message {

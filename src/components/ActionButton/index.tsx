@@ -8,6 +8,7 @@ interface ActionButtonProps {
   label: string;
   description?: string;
   variant?: 'default' | 'primary' | 'warning' | 'danger';
+  disabled?: boolean;
   onClick?: () => void;
 }
 
@@ -16,6 +17,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   label,
   description,
   variant = 'default',
+  disabled = false,
   onClick
 }) => {
   return (
@@ -23,9 +25,11 @@ const ActionButton: React.FC<ActionButtonProps> = ({
       className={classnames(styles.actionButton, {
         [styles.primary]: variant === 'primary',
         [styles.warning]: variant === 'warning',
-        [styles.danger]: variant === 'danger'
+        [styles.danger]: variant === 'danger',
+        [styles.disabled]: disabled
       })}
       onClick={onClick}
+      disabled={disabled}
     >
       <Text className={styles.icon}>{icon}</Text>
       <Text className={styles.label}>{label}</Text>
