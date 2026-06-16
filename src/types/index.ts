@@ -1,6 +1,7 @@
-export type QueueProcessStatus = 'queuing' | 'calling' | 'arrived' | 'charging' | 'completed' | 'overdue' | 'notInQueue';
+export type QueueProcessStatus = 'queuing' | 'calling' | 'arrived' | 'charging' | 'completed' | 'leaving' | 'overdue' | 'notInQueue';
 
 export interface ChargingInfo {
+  startBattery: number;
   currentBattery: number;
   targetBattery: number;
   chargingPower: number;
@@ -8,6 +9,14 @@ export interface ChargingInfo {
   chargingDuration: number;
   estimatedCost: number;
   chargingPileName: string;
+}
+
+export interface LeavingChecklist {
+  unplugged: boolean;
+  paid: boolean;
+  needWeigh: boolean;
+  weighed: boolean;
+  itemsChecked: boolean;
 }
 
 export interface QueueInfo {
@@ -31,6 +40,8 @@ export interface QueueInfo {
   chargingInfo?: ChargingInfo | null;
   vehicleId?: string;
   vehiclePlateNumber?: string;
+  leavingChecklist?: LeavingChecklist | null;
+  leaveTime?: string;
 }
 
 export interface Station {

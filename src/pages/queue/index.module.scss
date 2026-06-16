@@ -701,3 +701,252 @@
     transform: scale(0.98);
   }
 }
+
+.receiptCard {
+  background: linear-gradient(180deg, #fff8e1 0%, #fffde7 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+  border: 2rpx dashed #ffcc02;
+  position: relative;
+}
+
+.receiptCard::before,
+.receiptCard::after {
+  content: '';
+  position: absolute;
+  width: 32rpx;
+  height: 32rpx;
+  background: $color-bg-page;
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.receiptCard::before { left: -16rpx; }
+.receiptCard::after { right: -16rpx; }
+
+.receiptHeader {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  text-align: center;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.receiptDivider {
+  color: #e0e0e0;
+  font-size: $font-size-xs;
+  text-align: center;
+  margin: $spacing-sm 0;
+  overflow: hidden;
+  letter-spacing: -2rpx;
+}
+
+.receiptRows {
+  margin: $spacing-sm 0;
+}
+
+.receiptRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 6rpx 0;
+}
+
+.receiptLabel {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  flex-shrink: 0;
+}
+
+.receiptValue {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-all;
+}
+
+.receiptTotal {
+  padding: $spacing-md 0;
+  border-top: 1rpx dashed #e0e0e0;
+  margin-top: $spacing-sm;
+}
+
+.priceTotal {
+  font-size: $font-size-xl;
+  color: $color-error;
+  font-weight: $font-weight-bold;
+}
+
+.receiptThanks {
+  text-align: center;
+  margin-top: $spacing-md;
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
+.leavingCheckCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.leavingCheckTip {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-md;
+  display: block;
+}
+
+.checkItem {
+  @include button-reset;
+  width: 100%;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
+  text-align: left;
+  border: 2rpx solid transparent;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.checkChecked {
+  background: #e8f5e9;
+  border-color: $color-success;
+}
+
+.checkBox {
+  width: 44rpx;
+  height: 44rpx;
+  border: 3rpx solid $color-border;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+
+.checkBoxDisabled {
+  background: #e0e0e0;
+  border-color: #bdbdbd;
+}
+
+.checkChecked .checkBox {
+  background: $color-success;
+  border-color: $color-success;
+}
+
+.checkMark {
+  color: #fff;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+}
+
+.checkContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.checkTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.checkDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  line-height: 1.5;
+}
+
+.leavingSummary {
+  background: #fff3e0;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  text-align: center;
+  margin: $spacing-md 0;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: #e65100;
+}
+
+.summaryReady {
+  background: #e8f5e9;
+  color: $color-success;
+}
+
+.confirmLeaveBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+  border-radius: $radius-button;
+  color: #fff;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 8rpx 24rpx rgba(255, 152, 0, 0.3);
+  margin-bottom: $spacing-sm;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
+
+.btnDisabled {
+  opacity: 0.5;
+  filter: grayscale(30%);
+  box-shadow: none;
+
+  &:active {
+    opacity: 0.5;
+    transform: none;
+  }
+}
+
+.viewNavBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  background: #fff;
+  border: 2rpx solid $color-primary;
+  border-radius: $radius-button;
+  color: $color-primary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: #e3f2fd;
+  }
+}
+
+.chargingProgressCard .chargingDetails .chargingDetailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.chargingStartBattery {
+  font-size: $font-size-sm;
+  color: #ff9800;
+  font-weight: $font-weight-medium;
+  text-align: center;
+  padding: $spacing-sm;
+  background: #fff8e1;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+}

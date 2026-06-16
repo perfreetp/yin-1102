@@ -11,15 +11,18 @@ import { StationMapPoint } from '@/types';
 type PointType = 'all' | 'charging' | 'rest' | 'toilet' | 'weigh';
 
 const NavigationPage: React.FC = () => {
-  const { queueInfo } = useQueueStore();
+  const { queueInfo, toggleLeavingCheck } = useQueueStore();
   const [activeFilter, setActiveFilter] = useState<PointType>('all');
   const [selectedPoint, setSelectedPoint] = useState<StationMapPoint | null>(null);
   const [mapScale, setMapScale] = useState(1);
 
   const processStatus = queueInfo.processStatus;
+  const isLeavingState = processStatus === 'completed' || processStatus === 'leaving';
 
-  const getGuidanceConfig = (): { title: string; desc: string; highlightPoints: StationMapPoint[]; recommendedPoint?: StationMapPoint } => {
+  const getGuidanceConfig = (): { title: string; desc: string; highlightPoints: StationMapPoint[]; recommendedPoint?: StationMapPoint; steps?: string[] } => {
     const chargingAvailable = mockMapPoints.filter(p => p.type === 'charging' && p.status === 'available');
+    const weighPoints = mockMapPoints.filter(p => p.type === 'weigh');
+    const exitPoint = weighPoints.find(p => p.id === 'w2');
 
     switch (processStatus) {
       case 'calling':
@@ -27,14 +30,26 @@ const NavigationPage: React.FC = () => {
           title: '🔔 已叫号，请前往充电区',
           desc: '请根据推荐路线前往充电区，5分钟内到达指定位置',
           highlightPoints: chargingAvailable,
-          recommendedPoint: chargingAvailable[0]
+          recommendedPoint: chargingAvailable[0],
+          steps: [
+            '① 从停车场入口进入',
+            '② 沿主路直行约200米',
+            `③ 右转进入${chargingAvailable[0]?.name || 'B区'}`,
+            `④ 在${chargingAvailable[0]?.description || '指定桩位'}停靠`
+          ]
         };
       case 'arrived':
         return {
           title: '🚚 已到门口，前往桩位',
           desc: '请沿入口道路前往分配的充电桩位，注意场内限速5km/h',
           highlightPoints: chargingAvailable,
-          recommendedPoint: chargingAvailable[0]
+          recommendedPoint: chargingAvailable[0],
+          steps: [
+            '① 从入口闸机进入',
+            '② 沿引导车辆方向慢速行驶',
+            `③ 前往${chargingAvailable[0]?.name || '分配的充电桩位'}`,
+            '④ 工作人员确认后停靠'
+          ]
         };
       case 'charging':
         return {
@@ -44,11 +59,28 @@ const NavigationPage: React.FC = () => {
           recommendedPoint: mockMapPoints.find(p => p.id === 'r1')
         };
       case 'completed':
+      case 'leaving':
+        const needWeigh = queueInfo.leavingChecklist?.needWeigh;
         return {
-          title: '✅ 充电完成，请前往出口',
-          desc: '请沿主路驶向出口，出口处有称重点可称重',
-          highlightPoints: mockMapPoints.filter(p => p.type === 'weigh'),
-          recommendedPoint: mockMapPoints.find(p => p.id === 'w2')
+          title: processStatus === 'leaving' ? '🚶 离场中，请按指引离开' : '✅ 充电完成，请准备离场',
+          desc: needWeigh
+            ? '请先前往出口地磅称重，然后驶离场站'
+            : '无需称重，可直接沿主路驶向出口',
+          highlightPoints: weighPoints,
+          recommendedPoint: exitPoint,
+          steps: needWeigh
+            ? [
+                '① 拔出充电枪并放回原位',
+                '② 沿主路驶向出口方向',
+                '③ 先通过出口地磅称重',
+                '④ 称重完成后驶出大门'
+              ]
+            : [
+                '① 拔出充电枪并放回原位',
+                '② 确认车内物品齐全',
+                '③ 沿主路驶向出口',
+                '④ 从场站大门驶离'
+              ]
         };
       default:
         return {
@@ -111,6 +143,19 @@ const NavigationPage: React.FC = () => {
         <View className={styles.guidanceCard}>
           <Text className={styles.guidanceTitle}>{guidance.title}</Text>
           <Text className={styles.guidanceDesc}>{guidance.desc}</Text>
+          {guidance.steps && guidance.steps.length > 0 && (
+            <View className={styles.routeSteps}>
+              <Text className={styles.routeStepsTitle}>📍 详细路线步骤</Text>
+              {guidance.steps.map((step, index) => (
+                <View key={index} className={styles.routeStep}>
+                  <View className={styles.routeStepDot}>
+                    <Text>{index + 1}</Text>
+                  </View>
+                  <Text className={styles.routeStepText}>{step.replace(/^[①②③④⑤]/, '').trim()}</Text>
+                </View>
+              ))}
+            </View>
+          )}
           {guidance.recommendedPoint && (
             <View className={styles.guidanceAction}>
               <View className={styles.recommendedPoint}>
@@ -130,6 +175,64 @@ const NavigationPage: React.FC = () => {
               </Button>
             </View>
           )}
+        </View>
+      )}
+
+      {isLeavingState && queueInfo.leavingChecklist && (
+        <View className={styles.navChecklistCard}>
+          <Text className={styles.navChecklistTitle}>⚠️ 离场前检查</Text>
+          <Text className={styles.navChecklistTip}>完成以下检查后即可驶离场站</Text>
+          <Button
+            className={classnames(styles.navCheckItem, {
+              [styles.navCheckDone]: queueInfo.leavingChecklist.unplugged
+            })}
+            onClick={() => toggleLeavingCheck('unplugged')}
+          >
+            <View className={styles.navCheckBox}>
+              {queueInfo.leavingChecklist.unplugged && <Text>✓</Text>}
+            </View>
+            <View>
+              <Text className={styles.navCheckName}>🔌 已拔下充电枪</Text>
+              <Text className={styles.navCheckDesc}>确认充电枪已从车辆和充电桩上拔下并归位</Text>
+            </View>
+          </Button>
+          <Button
+            className={classnames(styles.navCheckItem, {
+              [styles.navCheckDone]: queueInfo.leavingChecklist.paid
+            })}
+            onClick={() => toggleLeavingCheck('paid')}
+          >
+            <View className={styles.navCheckBox}>
+              {queueInfo.leavingChecklist.paid && <Text>✓</Text>}
+            </View>
+            <View>
+              <Text className={styles.navCheckName}>💰 费用已结清</Text>
+              <Text className={styles.navCheckDesc}>
+                本次费用 ¥{queueInfo.chargingInfo?.estimatedCost?.toFixed(2) || '0.00'}
+              </Text>
+            </View>
+          </Button>
+          <Button
+            className={classnames(styles.navCheckItem, {
+              [styles.navCheckDone]: !queueInfo.leavingChecklist.needWeigh || queueInfo.leavingChecklist.weighed
+            })}
+            onClick={() => queueInfo.leavingChecklist!.needWeigh && toggleLeavingCheck('weighed')}
+            disabled={!queueInfo.leavingChecklist.needWeigh}
+          >
+            <View className={classnames(styles.navCheckBox, {
+              [styles.navCheckBoxDisabled]: !queueInfo.leavingChecklist.needWeigh
+            })}>
+              {(!queueInfo.leavingChecklist.needWeigh || queueInfo.leavingChecklist.weighed) && <Text>✓</Text>}
+            </View>
+            <View>
+              <Text className={styles.navCheckName}>⚖️ 出口地磅{queueInfo.leavingChecklist.needWeigh ? '（需称重）' : '（无需）'}</Text>
+              <Text className={styles.navCheckDesc}>
+                {queueInfo.leavingChecklist.needWeigh
+                  ? '请前往出口地磅完成称重后再离开'
+                  : '本次无需称重，可直接离场'}
+              </Text>
+            </View>
+          </Button>
         </View>
       )}
 

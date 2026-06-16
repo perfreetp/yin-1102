@@ -38,6 +38,8 @@ interface QueueState {
   markOverdue: () => void;
   recoverFromOverdue: () => void;
   completeAndSave: () => void;
+  confirmLeaveAndSaveHistory: () => void;
+  toggleLeavingCheck: (key: 'unplugged' | 'paid' | 'weighed') => void;
 }
 
 export const useQueueStore = create<QueueState>((set, get) => ({
@@ -467,6 +469,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
         const pileNames = ['B区4号快充桩', 'A区1号超充桩', 'C区2号普通桩', 'B区5号快充桩'];
         const startBattery = Math.floor(Math.random() * 15) + 5;
         updates.chargingInfo = {
+          startBattery,
           currentBattery: startBattery,
           targetBattery: 90,
           chargingPower: 120,
@@ -485,6 +488,15 @@ export const useQueueStore = create<QueueState>((set, get) => ({
             chargingDuration: state.queueInfo.chargingInfo.chargingDuration
           };
         }
+      } else if (status === 'leaving') {
+        updates.leaveTime = now;
+        updates.leavingChecklist = {
+          unplugged: false,
+          paid: true,
+          needWeigh: Math.random() > 0.5,
+          weighed: false,
+          itemsChecked: false
+        };
       } else if (status === 'overdue') {
         updates.status = 'overdue';
       }
@@ -573,6 +585,25 @@ export const useQueueStore = create<QueueState>((set, get) => ({
   },
 
   completeAndSave: () => {
+    console.log('[QueueStore] completeAndSave -> entering leaving state');
+    get().updateProcessStatus('leaving');
+    const state = get();
+    const q = state.queueInfo;
+    const ci = q.chargingInfo;
+
+    const completeMsg: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'system',
+      title: '充电完成，请确认离场',
+      content: `已充至${ci?.currentBattery ?? 90}%，费用约${ci?.estimatedCost ?? 0}元。请完成离场检查后离场。`,
+      time: new Date().toISOString(),
+      read: false,
+      pageUrl: '/pages/queue/index'
+    };
+    get().addMessage(completeMsg);
+  },
+
+  confirmLeaveAndSaveHistory: () => {
     const state = get();
     const q = state.queueInfo;
     const ci = q.chargingInfo;
@@ -592,27 +623,42 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       vehiclePlateNumber: q.vehiclePlateNumber,
       chargingDuration: ci?.chargingDuration,
       chargingCost: ci?.estimatedCost,
-      startBattery: 8,
+      startBattery: ci?.startBattery,
       endBattery: ci?.currentBattery ?? 90,
       chargingPileName: ci?.chargingPileName
     };
 
-    console.log('[QueueStore] completeAndSave, record:', record);
+    console.log('[QueueStore] confirmLeaveAndSaveHistory, record:', record);
 
     set((state) => ({
       historyRecords: [record, ...state.historyRecords],
       queueInfo: mockNotInQueue
     }));
 
-    const completeMsg: Message = {
+    const leaveMsg: Message = {
       id: `msg-${Date.now()}`,
       type: 'system',
-      title: '充电完成，已保存记录',
-      content: `${q.stationName}充电完成，已充至${ci?.currentBattery ?? 90}%，费用约${ci?.estimatedCost ?? 0}元。记录已保存至历史。`,
+      title: '本次服务已结束',
+      content: `感谢使用${q.stationName}，充电记录已保存。欢迎您下次光临！`,
       time: new Date().toISOString(),
       read: false,
       pageUrl: '/pages/profile/index'
     };
-    get().addMessage(completeMsg);
+    get().addMessage(leaveMsg);
+  },
+
+  toggleLeavingCheck: (key: 'unplugged' | 'paid' | 'weighed') => {
+    set((state) => {
+      if (!state.queueInfo.leavingChecklist) return state;
+      const checklist = { ...state.queueInfo.leavingChecklist, [key]: !state.queueInfo.leavingChecklist[key] };
+      const allChecked = checklist.unplugged && checklist.paid && (checklist.needWeigh ? checklist.weighed : true);
+      checklist.itemsChecked = allChecked;
+      return {
+        queueInfo: {
+          ...state.queueInfo,
+          leavingChecklist: checklist
+        }
+      };
+    });
   }
 }));

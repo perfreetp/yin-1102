@@ -415,3 +415,133 @@
   font-size: $font-size-md;
   color: $color-text-tertiary;
 }
+
+.routeSteps {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.routeStepsTitle {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+  display: block;
+}
+
+.routeStep {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: 6rpx 0;
+}
+
+.routeStepDot {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: $color-primary;
+  color: #fff;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2rpx;
+}
+
+.routeStepText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.navChecklistCard {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  border-left: 6rpx solid #ff9800;
+}
+
+.navChecklistTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: #e65100;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.navChecklistTip {
+  font-size: $font-size-sm;
+  color: #f57c00;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.navCheckItem {
+  @include button-reset;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-md;
+  margin-bottom: $spacing-sm;
+  text-align: left;
+  border: 2rpx solid transparent;
+
+  &:active {
+    background: #fff;
+  }
+}
+
+.navCheckDone {
+  background: #e8f5e9;
+  border-color: $color-success;
+}
+
+.navCheckBox {
+  width: 44rpx;
+  height: 44rpx;
+  border: 3rpx solid #ff9800;
+  border-radius: 8rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: $color-success;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+}
+
+.navCheckBoxDisabled {
+  background: #e0e0e0;
+  border-color: #9e9e9e;
+}
+
+.navCheckDone .navCheckBox {
+  background: $color-success;
+  border-color: $color-success;
+  color: #fff;
+}
+
+.navCheckName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.navCheckDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  line-height: 1.5;
+}

@@ -12,7 +12,7 @@ import { ChargingPreference, ActionReport, QueueProcessStatus } from '@/types';
 import { getPreferenceColor, formatTime } from '@/utils/format';
 
 const QueuePage: React.FC = () => {
-  const { queueInfo, updatePreference, simulateQueueUpdate, leaveQueue, reportAction, clearActionReport, fleetMembers, updateProcessStatus, simulateChargingProgress, markOverdue, recoverFromOverdue, completeAndSave } = useQueueStore();
+  const { queueInfo, updatePreference, simulateQueueUpdate, leaveQueue, reportAction, clearActionReport, fleetMembers, updateProcessStatus, simulateChargingProgress, markOverdue, recoverFromOverdue, completeAndSave, confirmLeaveAndSaveHistory, toggleLeavingCheck } = useQueueStore();
   const [selectedPreference, setSelectedPreference] = useState<ChargingPreference>(
     queueInfo.chargingPreference
   );
@@ -46,7 +46,8 @@ const QueuePage: React.FC = () => {
     { status: 'calling', label: '叫号中', icon: '🔔' },
     { status: 'arrived', label: '已到门口', icon: '🚚' },
     { status: 'charging', label: '充电中', icon: '⚡' },
-    { status: 'completed', label: '已完成', icon: '✅' }
+    { status: 'completed', label: '已完成', icon: '✅' },
+    { status: 'leaving', label: '离场中', icon: '🚶' }
   ];
 
   const getNextStepHint = () => {
@@ -56,7 +57,8 @@ const QueuePage: React.FC = () => {
       calling: { title: '请立即前往', content: `您的${queueInfo.queueNumber}号已叫号，请在5分钟内到达B区充电区`, action: '点击"已到门口"上报到达' },
       arrived: { title: '等待引导', content: '您已到达场站入口，请在原地等待工作人员引导入场', action: '如有需要可点击"协助倒车"' },
       charging: { title: '充电中', content: '车辆正在充电中，请在休息区耐心等待', action: '充电完成后会自动通知您' },
-      completed: { title: '已完成', content: '本次充电已完成，祝您一路平安', action: '欢迎下次光临' },
+      completed: { title: '已完成', content: '本次充电已完成，准备离场', action: '点击下方按钮进入离场流程' },
+      leaving: { title: '离场流程', content: '请完成离场检查清单，确认后即可离场', action: '全部确认后点击"确认离场"' },
       overdue: { title: '您已过号', content: '5分钟内未到场站，排队号已失效', action: '可尝试恢复排队或重新扫码入队' }
     };
     return hints[queueInfo.processStatus] || hints.notInQueue;
@@ -77,12 +79,39 @@ const QueuePage: React.FC = () => {
 
   const handleComplete = () => {
     Taro.showModal({
-      title: '确认完成',
-      content: '确认充电已完成，准备离场？完成后记录将保存到历史。',
+      title: '充电完成',
+      content: '确认充电已完成？完成后将进入离场流程。',
       success: (res) => {
         if (res.confirm) {
           completeAndSave();
-          Taro.showToast({ title: '已完成，记录已保存', icon: 'success' });
+          Taro.showToast({ title: '进入离场流程', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const handleConfirmLeave = () => {
+    const checklist = queueInfo.leavingChecklist;
+    if (checklist && !checklist.itemsChecked) {
+      const missing: string[] = [];
+      if (!checklist.unplugged) missing.push('充电枪已拔下');
+      if (!checklist.paid) missing.push('费用已支付');
+      if (checklist.needWeigh && !checklist.weighed) missing.push('已完成称重');
+      Taro.showModal({
+        title: '检查未完成',
+        content: `请确认以下事项：\n${missing.map((m, i) => `${i + 1}. ${m}`).join('\n')}`,
+        showCancel: false
+      });
+      return;
+    }
+
+    Taro.showModal({
+      title: '确认离场',
+      content: '确认已完成所有检查，准备离场？本次服务记录将保存到历史。',
+      success: (res) => {
+        if (res.confirm) {
+          confirmLeaveAndSaveHistory();
+          Taro.showToast({ title: '感谢您的使用！', icon: 'success' });
         }
       }
     });
@@ -379,20 +408,205 @@ const QueuePage: React.FC = () => {
                 </View>
               )}
 
-              {queueInfo.processStatus === 'completed' && (
+              {(queueInfo.processStatus === 'completed' || queueInfo.processStatus === 'leaving') && (
                 <View className={styles.section}>
-                  <View className={styles.completedCard}>
-                    <Text className={styles.completedIcon}>🎉</Text>
-                    <Text className={styles.completedTitle}>充电已完成</Text>
-                    <Text className={styles.completedDesc}>本次充电记录已保存至历史，感谢使用！</Text>
-                    <Button className={styles.completedBtn} onClick={() => Taro.switchTab({ url: '/pages/home/index' })}>
-                      返回首页
+                  <Text className={styles.sectionTitle}>
+                    <Text className={styles.titleIcon}>🧾</Text>
+                    充电小票
+                  </Text>
+                  <View className={styles.receiptCard}>
+                    <Text className={styles.receiptHeader}>
+                      <Text>🧾</Text> 充电服务凭证
+                    </Text>
+                    <View className={styles.receiptDivider}>----------------------------------------</View>
+                    <View className={styles.receiptRows}>
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>场站名称</Text>
+                        <Text className={styles.receiptValue}>{queueInfo.stationName}</Text>
+                      </View>
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>排队号码</Text>
+                        <Text className={styles.receiptValue}>#{queueInfo.queueNumber}</Text>
+                      </View>
+                      {queueInfo.vehiclePlateNumber && (
+                        <View className={styles.receiptRow}>
+                          <Text className={styles.receiptLabel}>车牌号码</Text>
+                          <Text className={styles.receiptValue}>{queueInfo.vehiclePlateNumber}</Text>
+                        </View>
+                      )}
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>充电桩位</Text>
+                        <Text className={styles.receiptValue}>{chargingInfo?.chargingPileName || '-'}</Text>
+                      </View>
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>充电偏好</Text>
+                        <Text className={styles.receiptValue}>{queueInfo.chargingPreference.label}</Text>
+                      </View>
+                      <View className={styles.receiptDivider}>----------------------------------------</View>
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>入站时间</Text>
+                        <Text className={styles.receiptValue}>{new Date(queueInfo.joinTime).toLocaleString('zh-CN')}</Text>
+                      </View>
+                      {queueInfo.arriveTime && (
+                        <View className={styles.receiptRow}>
+                          <Text className={styles.receiptLabel}>到场时间</Text>
+                          <Text className={styles.receiptValue}>{new Date(queueInfo.arriveTime).toLocaleString('zh-CN')}</Text>
+                        </View>
+                      )}
+                      {queueInfo.chargingStartTime && (
+                        <View className={styles.receiptRow}>
+                          <Text className={styles.receiptLabel}>开始充电</Text>
+                          <Text className={styles.receiptValue}>{new Date(queueInfo.chargingStartTime).toLocaleString('zh-CN')}</Text>
+                        </View>
+                      )}
+                      {queueInfo.completeTime && (
+                        <View className={styles.receiptRow}>
+                          <Text className={styles.receiptLabel}>充电完成</Text>
+                          <Text className={styles.receiptValue}>{new Date(queueInfo.completeTime).toLocaleString('zh-CN')}</Text>
+                        </View>
+                      )}
+                      {queueInfo.leaveTime && (
+                        <View className={styles.receiptRow}>
+                          <Text className={styles.receiptLabel}>离场时间</Text>
+                          <Text className={styles.receiptValue}>{new Date(queueInfo.leaveTime).toLocaleString('zh-CN')}</Text>
+                        </View>
+                      )}
+                      <View className={styles.receiptDivider}>----------------------------------------</View>
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>起始电量</Text>
+                        <Text className={styles.receiptValue}>
+                          <Text style={{ color: '#ff9800' }}>{chargingInfo?.startBattery ?? '--'}%</Text>
+                        </Text>
+                      </View>
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>结束电量</Text>
+                        <Text className={styles.receiptValue}>
+                          <Text style={{ color: '#4caf50' }}>{chargingInfo?.currentBattery ?? '--'}%</Text>
+                        </Text>
+                      </View>
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>充电电量</Text>
+                        <Text className={styles.receiptValue}>
+                          {chargingInfo ? `${chargingInfo.currentBattery - chargingInfo.startBattery}%` : '--'}
+                        </Text>
+                      </View>
+                      <View className={styles.receiptRow}>
+                        <Text className={styles.receiptLabel}>充电时长</Text>
+                        <Text className={styles.receiptValue}>
+                          {chargingInfo?.chargingDuration ? `${chargingInfo.chargingDuration}分钟` : '--'}
+                        </Text>
+                      </View>
+                      <View className={styles.receiptDivider}>----------------------------------------</View>
+                      <View className={classnames(styles.receiptRow, styles.receiptTotal)}>
+                        <Text className={styles.receiptLabel}>费用合计</Text>
+                        <Text className={classnames(styles.receiptValue, styles.priceTotal)}>
+                          ¥{chargingInfo?.estimatedCost?.toFixed(2) || '0.00'}
+                        </Text>
+                      </View>
+                    </View>
+                    <View className={styles.receiptThanks}>
+                      <Text>感谢使用，一路平安！🚛</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {queueInfo.processStatus === 'leaving' && queueInfo.leavingChecklist && (
+                <View className={styles.section}>
+                  <Text className={styles.sectionTitle}>
+                    <Text className={styles.titleIcon}>✅</Text>
+                    离场前检查
+                  </Text>
+                  <View className={styles.leavingCheckCard}>
+                    <Text className={styles.leavingCheckTip}>
+                      请确认以下事项，完成后即可离场
+                    </Text>
+                    <Button
+                      className={classnames(styles.checkItem, { [styles.checkChecked]: queueInfo.leavingChecklist.unplugged })}
+                      onClick={() => toggleLeavingCheck('unplugged')}
+                    >
+                      <View className={styles.checkBox}>
+                        {queueInfo.leavingChecklist.unplugged && <Text className={styles.checkMark}>✓</Text>}
+                      </View>
+                      <View className={styles.checkContent}>
+                        <Text className={styles.checkTitle}>🔌 充电枪已拔下</Text>
+                        <Text className={styles.checkDesc}>确认已从车辆和充电桩上拔下充电枪</Text>
+                      </View>
+                    </Button>
+
+                    <Button
+                      className={classnames(styles.checkItem, { [styles.checkChecked]: queueInfo.leavingChecklist.paid })}
+                      onClick={() => toggleLeavingCheck('paid')}
+                    >
+                      <View className={styles.checkBox}>
+                        {queueInfo.leavingChecklist.paid && <Text className={styles.checkMark}>✓</Text>}
+                      </View>
+                      <View className={styles.checkContent}>
+                        <Text className={styles.checkTitle}>💰 费用已支付</Text>
+                        <Text className={styles.checkDesc}>
+                          本次费用 ¥{chargingInfo?.estimatedCost?.toFixed(2) || '0.00'}
+                          {queueInfo.leavingChecklist.paid && <Text style={{ color: '#4caf50', marginLeft: 8 }}>（已自动结算）</Text>}
+                        </Text>
+                      </View>
+                    </Button>
+
+                    <Button
+                      className={classnames(styles.checkItem, { [styles.checkChecked]: !queueInfo.leavingChecklist.needWeigh || queueInfo.leavingChecklist.weighed })}
+                      onClick={() => queueInfo.leavingChecklist!.needWeigh && toggleLeavingCheck('weighed')}
+                      disabled={!queueInfo.leavingChecklist.needWeigh}
+                    >
+                      <View className={classnames(styles.checkBox, { [styles.checkBoxDisabled]: !queueInfo.leavingChecklist.needWeigh })}>
+                        {(queueInfo.leavingChecklist.weighed || !queueInfo.leavingChecklist.needWeigh) && <Text className={styles.checkMark}>✓</Text>}
+                      </View>
+                      <View className={styles.checkContent}>
+                        <Text className={styles.checkTitle}>⚖️ 出口地磅称重</Text>
+                        <Text className={styles.checkDesc}>
+                          {queueInfo.leavingChecklist.needWeigh
+                            ? '本次需要过磅，请前往出口地磅称重'
+                            : '本次无需称重，可直接离场'}
+                        </Text>
+                      </View>
+                    </Button>
+
+                    <View className={classnames(styles.leavingSummary, {
+                      [styles.summaryReady]: queueInfo.leavingChecklist.itemsChecked
+                    })}>
+                      {queueInfo.leavingChecklist.itemsChecked ? (
+                        <Text>✅ 检查完成，可以离场</Text>
+                      ) : (
+                        <Text>⚠️ 还有未确认的检查项</Text>
+                      )}
+                    </View>
+
+                    <Button
+                      className={classnames(styles.confirmLeaveBtn, {
+                        [styles.btnDisabled]: !queueInfo.leavingChecklist.itemsChecked
+                      })}
+                      onClick={handleConfirmLeave}
+                      disabled={!queueInfo.leavingChecklist.itemsChecked}
+                    >
+                      🚛 确认离场，保存本次记录
+                    </Button>
+
+                    <Button
+                      className={styles.viewNavBtn}
+                      onClick={() => Taro.switchTab({ url: '/pages/navigation/index' })}
+                    >
+                      🧭 查看离场路线导航
                     </Button>
                   </View>
                 </View>
               )}
 
-              {queueInfo.processStatus !== 'charging' && queueInfo.processStatus !== 'completed' && (
+              {queueInfo.processStatus === 'completed' && (
+                <View className={styles.section}>
+                  <Button className={styles.startChargingBtn} onClick={handleComplete}>
+                    🚶 进入离场流程
+                  </Button>
+                </View>
+              )}
+
+              {!['charging', 'completed', 'leaving'].includes(queueInfo.processStatus) && (
                 <View className={styles.section}>
                   <Text className={styles.sectionTitle}>
                     <Text className={styles.titleIcon}>⚡</Text>
