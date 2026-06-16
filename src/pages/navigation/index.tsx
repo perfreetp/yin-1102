@@ -5,14 +5,62 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import { mockMapPoints, stationInfo, pointTypeConfig } from '@/data/mockNavigation';
 import MapPoint from '@/components/MapPoint';
+import { useQueueStore } from '@/store/useQueueStore';
 import { StationMapPoint } from '@/types';
 
 type PointType = 'all' | 'charging' | 'rest' | 'toilet' | 'weigh';
 
 const NavigationPage: React.FC = () => {
+  const { queueInfo } = useQueueStore();
   const [activeFilter, setActiveFilter] = useState<PointType>('all');
   const [selectedPoint, setSelectedPoint] = useState<StationMapPoint | null>(null);
   const [mapScale, setMapScale] = useState(1);
+
+  const processStatus = queueInfo.processStatus;
+
+  const getGuidanceConfig = (): { title: string; desc: string; highlightPoints: StationMapPoint[]; recommendedPoint?: StationMapPoint } => {
+    const chargingAvailable = mockMapPoints.filter(p => p.type === 'charging' && p.status === 'available');
+
+    switch (processStatus) {
+      case 'calling':
+        return {
+          title: '🔔 已叫号，请前往充电区',
+          desc: '请根据推荐路线前往充电区，5分钟内到达指定位置',
+          highlightPoints: chargingAvailable,
+          recommendedPoint: chargingAvailable[0]
+        };
+      case 'arrived':
+        return {
+          title: '🚚 已到门口，前往桩位',
+          desc: '请沿入口道路前往分配的充电桩位，注意场内限速5km/h',
+          highlightPoints: chargingAvailable,
+          recommendedPoint: chargingAvailable[0]
+        };
+      case 'charging':
+        return {
+          title: '⚡ 充电中，可去休息区等待',
+          desc: '充电期间可前往休息区等待，充电完成会有通知提醒',
+          highlightPoints: mockMapPoints.filter(p => p.type === 'rest'),
+          recommendedPoint: mockMapPoints.find(p => p.id === 'r1')
+        };
+      case 'completed':
+        return {
+          title: '✅ 充电完成，请前往出口',
+          desc: '请沿主路驶向出口，出口处有称重点可称重',
+          highlightPoints: mockMapPoints.filter(p => p.type === 'weigh'),
+          recommendedPoint: mockMapPoints.find(p => p.id === 'w2')
+        };
+      default:
+        return {
+          title: '📍 场站导航',
+          desc: '浏览场站内各类设施位置',
+          highlightPoints: [],
+          recommendedPoint: undefined
+        };
+    }
+  };
+
+  const guidance = getGuidanceConfig();
 
   const handleFilterChange = (filter: PointType) => {
     console.log('[NavigationPage] filter changed:', filter);
@@ -59,6 +107,32 @@ const NavigationPage: React.FC = () => {
 
   return (
     <ScrollView className={styles.page} scrollY>
+      {processStatus !== 'notInQueue' && processStatus !== 'queuing' && (
+        <View className={styles.guidanceCard}>
+          <Text className={styles.guidanceTitle}>{guidance.title}</Text>
+          <Text className={styles.guidanceDesc}>{guidance.desc}</Text>
+          {guidance.recommendedPoint && (
+            <View className={styles.guidanceAction}>
+              <View className={styles.recommendedPoint}>
+                <Text className={styles.recommendedIcon}>
+                  {pointTypeConfig[guidance.recommendedPoint.type].icon}
+                </Text>
+                <View className={styles.recommendedInfo}>
+                  <Text className={styles.recommendedName}>{guidance.recommendedPoint.name}</Text>
+                  <Text className={styles.recommendedDesc}>{guidance.recommendedPoint.description}</Text>
+                </View>
+              </View>
+              <Button
+                className={styles.guidanceNavBtn}
+                onClick={() => handleNavigate(guidance.recommendedPoint!)}
+              >
+                🧭 导航前往
+              </Button>
+            </View>
+          )}
+        </View>
+      )}
+
       <View className={styles.mapContainer}>
         <View
           className={styles.mapBg}
@@ -77,14 +151,16 @@ const NavigationPage: React.FC = () => {
             <Text className={styles.zoneLabel}>C区</Text>
           </View>
 
-          {filteredPoints.map((point) => (
-            <MapPoint
-              key={point.id}
-              point={point}
-              selected={selectedPoint?.id === point.id}
-              onClick={() => handlePointClick(point)}
-            />
-          ))}
+          {filteredPoints.map((point) => {
+            return (
+              <MapPoint
+                key={point.id}
+                point={point}
+                selected={selectedPoint?.id === point.id}
+                onClick={() => handlePointClick(point)}
+              />
+            );
+          })}
         </View>
 
         <View className={styles.mapControls}>
@@ -135,40 +211,46 @@ const NavigationPage: React.FC = () => {
             <Text className={styles.titleIcon}>📍</Text>
             点位列表
           </Text>
-          {filteredPoints.map((point) => (
-            <View key={point.id} className={styles.pointCard}>
-              <View className={styles.pointHeader}>
-                <View className={styles.pointInfo}>
+          {filteredPoints.map((point) => {
+            const isRecommended = guidance.recommendedPoint?.id === point.id;
+            return (
+              <View key={point.id} className={classnames(styles.pointCard, { [styles.recommendedCard]: isRecommended })}>
+                <View className={styles.pointHeader}>
+                  <View className={styles.pointInfo}>
+                    <View
+                      className={styles.pointIcon}
+                      style={{ backgroundColor: `${pointTypeConfig[point.type].color}20` }}
+                    >
+                      <Text>{pointTypeConfig[point.type].icon}</Text>
+                    </View>
+                    <View className={styles.pointDetails}>
+                      <Text className={styles.pointName}>
+                        {point.name}
+                        {isRecommended && <Text style={{ color: '#ff9800', marginLeft: 8, fontSize: 24 }}>推荐</Text>}
+                      </Text>
+                      <Text className={styles.pointDesc}>{point.description}</Text>
+                    </View>
+                  </View>
                   <View
-                    className={styles.pointIcon}
-                    style={{ backgroundColor: `${pointTypeConfig[point.type].color}20` }}
+                    className={classnames(styles.pointStatus, {
+                      [styles.statusAvailable]: point.status === 'available',
+                      [styles.statusOccupied]: point.status === 'occupied'
+                    })}
                   >
-                    <Text>{pointTypeConfig[point.type].icon}</Text>
-                  </View>
-                  <View className={styles.pointDetails}>
-                    <Text className={styles.pointName}>{point.name}</Text>
-                    <Text className={styles.pointDesc}>{point.description}</Text>
+                    {point.status === 'available' ? '空闲' : '占用'}
                   </View>
                 </View>
-                <View
-                  className={classnames(styles.pointStatus, {
-                    [styles.statusAvailable]: point.status === 'available',
-                    [styles.statusOccupied]: point.status === 'occupied'
-                  })}
-                >
-                  {point.status === 'available' ? '空闲' : '占用'}
+                <View style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                  <Button
+                    className={styles.navigateBtn}
+                    onClick={() => handleNavigate(point)}
+                  >
+                    🧭 导航到这里
+                  </Button>
                 </View>
               </View>
-              <View style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-                <Button
-                  className={styles.navigateBtn}
-                  onClick={() => handleNavigate(point)}
-                >
-                  🧭 导航到这里
-                </Button>
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       ) : (
         <View className={styles.emptyState}>

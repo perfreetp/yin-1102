@@ -60,7 +60,8 @@ export const mockNotInQueue: QueueInfo = {
   estimatedCallTime: '',
   chargingPreference: { type: 'normal', label: '普通安排' },
   currentCalledNumber: 0,
-  totalInQueue: 0
+  totalInQueue: 0,
+  chargingInfo: null
 };
 
 export const mockFleetMembers: FleetMember[] = [

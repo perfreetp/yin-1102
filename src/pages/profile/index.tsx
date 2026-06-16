@@ -1,15 +1,15 @@
-import React, { useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, Button, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import { useQueueStore } from '@/store/useQueueStore';
-import { mockHistoryRecords } from '@/data/mockVehicles';
 import VehicleCard from '@/components/VehicleCard';
-import { Vehicle } from '@/types';
+import { Vehicle, HistoryRecord } from '@/types';
 
 const ProfilePage: React.FC = () => {
-  const { vehicles, setDefaultVehicle, getUnreadCount } = useQueueStore();
+  const { vehicles, setDefaultVehicle, getUnreadCount, historyRecords } = useQueueStore();
+  const [expandedVehicle, setExpandedVehicle] = useState<string | null>(null);
 
   useDidShow(useCallback(() => {
     console.log('[ProfilePage] page did show, vehicles:', vehicles.length);
@@ -33,18 +33,35 @@ const ProfilePage: React.FC = () => {
     Taro.showToast({ title: '已设为默认车辆', icon: 'success' });
   };
 
-  const handleHistoryClick = (record: any) => {
-    console.log('[ProfilePage] history clicked:', record.id);
-    Taro.showModal({
-      title: record.stationName,
-      content: `入站：${record.enterTime}\n出站：${record.exitTime}\n排队号：${record.queueNumber}\n等待时长：${record.waitTime}分钟\n充电类型：${record.chargingType}`,
-      showCancel: false
-    });
+  const toggleVehicleHistory = (vehicleId: string) => {
+    setExpandedVehicle(prev => prev === vehicleId ? null : vehicleId);
   };
 
-  const handleViewAllHistory = () => {
-    console.log('[ProfilePage] view all history');
-    Taro.showToast({ title: '历史记录功能开发中', icon: 'none' });
+  const getVehicleHistory = (vehicleId: string): HistoryRecord[] => {
+    return historyRecords.filter(r => r.vehicleId === vehicleId);
+  };
+
+  const handleHistoryDetail = (record: HistoryRecord) => {
+    console.log('[ProfilePage] history clicked:', record.id);
+    const lines = [
+      `场站：${record.stationName}`,
+      `入站：${new Date(record.enterTime).toLocaleString('zh-CN')}`,
+      `出站：${new Date(record.exitTime).toLocaleString('zh-CN')}`,
+      `排队号：${record.queueNumber}`,
+      `等待时长：${record.waitTime}分钟`,
+      `充电类型：${record.chargingType}`
+    ];
+    if (record.chargingDuration) lines.push(`充电时长：${record.chargingDuration}分钟`);
+    if (record.chargingCost) lines.push(`充电费用：¥${record.chargingCost}`);
+    if (record.startBattery && record.endBattery) lines.push(`电量：${record.startBattery}% → ${record.endBattery}%`);
+    if (record.chargingPileName) lines.push(`充电桩：${record.chargingPileName}`);
+    if (record.vehiclePlateNumber) lines.push(`车辆：${record.vehiclePlateNumber}`);
+
+    Taro.showModal({
+      title: '进站详情',
+      content: lines.join('\n'),
+      showCancel: false
+    });
   };
 
   const handleMenuClick = (menu: string) => {
@@ -77,8 +94,6 @@ const ProfilePage: React.FC = () => {
     { id: 'help', icon: '❓', label: '帮助中心', color: '#2196f3' }
   ];
 
-  const recentHistory = mockHistoryRecords.slice(0, 3);
-
   return (
     <ScrollView className={styles.page} scrollY>
       <View className={styles.userCard}>
@@ -93,7 +108,7 @@ const ProfilePage: React.FC = () => {
         </View>
         <View className={styles.userStats}>
           <View className={styles.statItem}>
-            <Text className={styles.statValue}>{mockHistoryRecords.length}</Text>
+            <Text className={styles.statValue}>{historyRecords.length}</Text>
             <Text className={styles.statLabel}>累计进站</Text>
           </View>
           <View className={styles.statItem}>
@@ -118,15 +133,59 @@ const ProfilePage: React.FC = () => {
           </Button>
         </View>
         <View className={styles.vehiclesList}>
-          {vehicles.map((vehicle) => (
-            <VehicleCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              selected={vehicle.isDefault}
-              onSelect={() => handleVehicleSelect(vehicle)}
-              onEdit={() => handleVehicleEdit(vehicle)}
-            />
-          ))}
+          {vehicles.map((vehicle) => {
+            const vehicleHistory = getVehicleHistory(vehicle.id);
+            const isExpanded = expandedVehicle === vehicle.id;
+            return (
+              <View key={vehicle.id} className={styles.vehicleBlock}>
+                <VehicleCard
+                  vehicle={vehicle}
+                  selected={vehicle.isDefault}
+                  onSelect={() => handleVehicleSelect(vehicle)}
+                  onEdit={() => handleVehicleEdit(vehicle)}
+                />
+                <Button
+                  className={styles.vehicleHistoryToggle}
+                  onClick={() => toggleVehicleHistory(vehicle.id)}
+                >
+                  📋 {isExpanded ? '收起记录' : `查看进站记录(${vehicleHistory.length})`}
+                </Button>
+                {isExpanded && vehicleHistory.length > 0 && (
+                  <View className={styles.vehicleHistoryList}>
+                    {vehicleHistory.slice(0, 5).map((record) => (
+                      <View
+                        key={record.id}
+                        className={styles.historyItem}
+                        onClick={() => handleHistoryDetail(record)}
+                      >
+                        <View className={styles.historyInfo}>
+                          <Text className={styles.historyStation}>{record.stationName}</Text>
+                          <Text className={styles.historyTime}>
+                            {new Date(record.enterTime).toLocaleDateString('zh-CN')}
+                          </Text>
+                        </View>
+                        <View className={styles.historyDetails}>
+                          <Text className={styles.historyQueue}>#{record.queueNumber}</Text>
+                          {record.chargingCost != null && (
+                            <Text className={styles.historyCost}>¥{record.chargingCost}</Text>
+                          )}
+                          {record.endBattery != null && (
+                            <Text className={styles.historyBattery}>🔋{record.endBattery}%</Text>
+                          )}
+                          <Text className={styles.historyDuration}>等{record.waitTime}分钟</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+                {isExpanded && vehicleHistory.length === 0 && (
+                  <View className={styles.noHistory}>
+                    <Text className={styles.noHistoryText}>暂无进站记录</Text>
+                  </View>
+                )}
+              </View>
+            );
+          })}
         </View>
       </View>
 
@@ -138,13 +197,13 @@ const ProfilePage: React.FC = () => {
           </Text>
         </View>
         <View className={styles.historySection}>
-          {recentHistory.length > 0 ? (
+          {historyRecords.length > 0 ? (
             <>
-              {recentHistory.map((record) => (
+              {historyRecords.slice(0, 5).map((record) => (
                 <View
                   key={record.id}
                   className={styles.historyItem}
-                  onClick={() => handleHistoryClick(record)}
+                  onClick={() => handleHistoryDetail(record)}
                 >
                   <View className={styles.historyInfo}>
                     <Text className={styles.historyStation}>{record.stationName}</Text>
@@ -154,13 +213,16 @@ const ProfilePage: React.FC = () => {
                   </View>
                   <View className={styles.historyDetails}>
                     <Text className={styles.historyQueue}>#{record.queueNumber}</Text>
-                    <Text className={styles.historyDuration}>等待{record.waitTime}分钟</Text>
+                    {record.vehiclePlateNumber && (
+                      <Text className={styles.historyVehicle}>{record.vehiclePlateNumber}</Text>
+                    )}
+                    {record.chargingCost != null && (
+                      <Text className={styles.historyCost}>¥{record.chargingCost}</Text>
+                    )}
+                    <Text className={styles.historyDuration}>等{record.waitTime}分钟</Text>
                   </View>
                 </View>
               ))}
-              <Button className={styles.viewAllBtn} onClick={handleViewAllHistory}>
-                查看全部历史记录 →
-              </Button>
             </>
           ) : (
             <View className={styles.emptyState}>

@@ -176,6 +176,62 @@
   color: $color-text-secondary;
 }
 
+.historyCost {
+  font-size: $font-size-xs;
+  color: #ff9800;
+  font-weight: $font-weight-medium;
+}
+
+.historyBattery {
+  font-size: $font-size-xs;
+  color: #4caf50;
+}
+
+.historyVehicle {
+  font-size: $font-size-xs;
+  color: $color-text-secondary;
+}
+
+.vehicleBlock {
+  margin-bottom: $spacing-md;
+}
+
+.vehicleHistoryToggle {
+  @include button-reset;
+  width: 100%;
+  height: 64rpx;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  color: $color-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  margin-top: $spacing-sm;
+
+  &:active {
+    background: $color-bg-hover;
+  }
+}
+
+.vehicleHistoryList {
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  padding: $spacing-sm $spacing-md;
+  margin-top: $spacing-sm;
+}
+
+.noHistory {
+  text-align: center;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  margin-top: $spacing-sm;
+}
+
+.noHistoryText {
+  font-size: $font-size-sm;
+  color: $color-text-tertiary;
+}
+
 .viewAllBtn {
   @include button-reset;
   width: 100%;

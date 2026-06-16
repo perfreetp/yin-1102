@@ -1,4 +1,14 @@
-export type QueueProcessStatus = 'queuing' | 'calling' | 'arrived' | 'charging' | 'completed' | 'notInQueue';
+export type QueueProcessStatus = 'queuing' | 'calling' | 'arrived' | 'charging' | 'completed' | 'overdue' | 'notInQueue';
+
+export interface ChargingInfo {
+  currentBattery: number;
+  targetBattery: number;
+  chargingPower: number;
+  estimatedFullTime: string;
+  chargingDuration: number;
+  estimatedCost: number;
+  chargingPileName: string;
+}
 
 export interface QueueInfo {
   id: string;
@@ -18,6 +28,9 @@ export interface QueueInfo {
   arriveTime?: string;
   chargingStartTime?: string;
   completeTime?: string;
+  chargingInfo?: ChargingInfo | null;
+  vehicleId?: string;
+  vehiclePlateNumber?: string;
 }
 
 export interface Station {
@@ -83,11 +96,19 @@ export interface Vehicle {
 export interface HistoryRecord {
   id: string;
   stationName: string;
+  stationId?: string;
   enterTime: string;
   exitTime: string;
   queueNumber: number;
   waitTime: number;
   chargingType: string;
+  vehicleId?: string;
+  vehiclePlateNumber?: string;
+  chargingDuration?: number;
+  chargingCost?: number;
+  startBattery?: number;
+  endBattery?: number;
+  chargingPileName?: string;
 }
 
 export interface StationMapPoint {

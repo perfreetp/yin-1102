@@ -6,6 +6,82 @@
   box-sizing: border-box;
 }
 
+.guidanceCard {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  border-left: 6rpx solid $color-primary;
+}
+
+.guidanceTitle {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-primary;
+  display: block;
+  margin-bottom: $spacing-sm;
+}
+
+.guidanceDesc {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.guidanceAction {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: $radius-md;
+  padding: $spacing-md;
+}
+
+.recommendedPoint {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  flex: 1;
+}
+
+.recommendedIcon {
+  font-size: 48rpx;
+}
+
+.recommendedInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.recommendedName {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.recommendedDesc {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.guidanceNavBtn {
+  @include button-reset;
+  padding: $spacing-sm $spacing-md;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+}
+
+.recommendedCard {
+  border: 2rpx solid #ff9800;
+  background: #fff8e1;
+}
+
 .mapContainer {
   position: relative;
   width: 100%;

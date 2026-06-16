@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import { QueueInfo, ChargingPreference, Message, Vehicle, Station, FleetMember, ActionReport, QueueProcessStatus } from '@/types';
+import { QueueInfo, ChargingPreference, Message, Vehicle, Station, FleetMember, ActionReport, QueueProcessStatus, HistoryRecord } from '@/types';
 import { mockQueueInfo, mockNotInQueue, mockFleetMembers } from '@/data/mockQueue';
 import { mockMessages } from '@/data/mockMessages';
-import { mockVehicles } from '@/data/mockVehicles';
+import { mockVehicles, mockHistoryRecords } from '@/data/mockVehicles';
 
 interface QueueState {
   queueInfo: QueueInfo;
@@ -12,6 +12,7 @@ interface QueueState {
   fleetMembers: FleetMember[];
   fleetCode: string;
   stations: Station[];
+  historyRecords: HistoryRecord[];
   setQueueInfo: (info: QueueInfo) => void;
   updatePreference: (pref: ChargingPreference) => void;
   joinQueue: (stationId: string, stationName: string) => void;
@@ -33,6 +34,10 @@ interface QueueState {
   inviteFleetMember: () => string;
   updateFleetMemberStatus: (id: string, status: 'pending' | 'accepted' | 'rejected') => void;
   updateProcessStatus: (status: QueueProcessStatus) => void;
+  simulateChargingProgress: () => void;
+  markOverdue: () => void;
+  recoverFromOverdue: () => void;
+  completeAndSave: () => void;
 }
 
 export const useQueueStore = create<QueueState>((set, get) => ({
@@ -46,6 +51,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
     joinTime: new Date().toISOString()
   })),
   fleetCode: '88235',
+  historyRecords: mockHistoryRecords.map(r => ({ ...r, vehicleId: '1', vehiclePlateNumber: '京A·D88235' })),
   stations: [
     { id: 'S001', name: '京东物流港充电站', address: '北京市朝阳区京东大道1号', phone: '400-123-4567', totalChargingPorts: 20, availablePorts: 8 },
     { id: 'S002', name: '顺丰速运顺义场站', address: '北京市顺义区顺丰路88号', phone: '400-987-6543', totalChargingPorts: 15, availablePorts: 3 },
@@ -60,6 +66,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
 
   joinQueue: (stationId, stationName) => {
     const newQueueNumber = Math.floor(Math.random() * 50) + 30;
+    const cv = get().currentVehicle;
     const newQueueInfo: QueueInfo = {
       id: `Q${Date.now()}`,
       stationId,
@@ -73,7 +80,9 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       estimatedCallTime: new Date(Date.now() + 45 * 60 * 1000).toISOString(),
       chargingPreference: { type: 'normal', label: '普通安排' },
       currentCalledNumber: newQueueNumber - 5,
-      totalInQueue: newQueueNumber + 10
+      totalInQueue: newQueueNumber + 10,
+      vehicleId: cv?.id,
+      vehiclePlateNumber: cv?.plateNumber
     };
     console.log('[QueueStore] joinQueue:', newQueueInfo);
     set({ queueInfo: newQueueInfo });
@@ -455,9 +464,29 @@ export const useQueueStore = create<QueueState>((set, get) => ({
         updates.arriveTime = now;
       } else if (status === 'charging') {
         updates.chargingStartTime = now;
+        const pileNames = ['B区4号快充桩', 'A区1号超充桩', 'C区2号普通桩', 'B区5号快充桩'];
+        const startBattery = Math.floor(Math.random() * 15) + 5;
+        updates.chargingInfo = {
+          currentBattery: startBattery,
+          targetBattery: 90,
+          chargingPower: 120,
+          estimatedFullTime: '',
+          chargingDuration: 0,
+          estimatedCost: 0,
+          chargingPileName: pileNames[Math.floor(Math.random() * pileNames.length)]
+        };
       } else if (status === 'completed') {
         updates.completeTime = now;
         updates.status = 'completed';
+        if (state.queueInfo.chargingInfo) {
+          updates.chargingInfo = {
+            ...state.queueInfo.chargingInfo,
+            currentBattery: state.queueInfo.chargingInfo.targetBattery,
+            chargingDuration: state.queueInfo.chargingInfo.chargingDuration
+          };
+        }
+      } else if (status === 'overdue') {
+        updates.status = 'overdue';
       }
 
       return {
@@ -467,5 +496,123 @@ export const useQueueStore = create<QueueState>((set, get) => ({
         }
       };
     });
+  },
+
+  simulateChargingProgress: () => {
+    const state = get();
+    if (state.queueInfo.processStatus !== 'charging' || !state.queueInfo.chargingInfo) return;
+
+    const info = state.queueInfo.chargingInfo;
+    const increment = Math.floor(Math.random() * 5) + 3;
+    const newBattery = Math.min(info.currentBattery + increment, info.targetBattery);
+    const newDuration = info.chargingDuration + 5;
+    const remainPct = info.targetBattery - newBattery;
+    const remainMin = Math.max(0, Math.round(remainPct / 2.5));
+    const costPerKwh = 1.2;
+    const assumedCapacity = 300;
+    const estimatedCost = Math.round(newBattery / 100 * assumedCapacity * costPerKwh * 10) / 10;
+
+    set({
+      queueInfo: {
+        ...state.queueInfo,
+        chargingInfo: {
+          ...info,
+          currentBattery: newBattery,
+          chargingDuration: newDuration,
+          estimatedFullTime: remainMin > 0 ? `约${remainMin}分钟` : '已充满',
+          estimatedCost
+        }
+      }
+    });
+  },
+
+  markOverdue: () => {
+    console.log('[QueueStore] markOverdue');
+    set((state) => ({
+      queueInfo: {
+        ...state.queueInfo,
+        status: 'overdue',
+        processStatus: 'overdue'
+      }
+    }));
+
+    const overdueMsg: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'overdue',
+      title: '您已过号',
+      content: `您的${get().queueInfo.queueNumber}号已过号，5分钟内未到场站。您可尝试恢复排队或重新扫码入队。`,
+      time: new Date().toISOString(),
+      read: false,
+      queueNumber: get().queueInfo.queueNumber,
+      pageUrl: '/pages/queue/index'
+    };
+    get().addMessage(overdueMsg);
+  },
+
+  recoverFromOverdue: () => {
+    console.log('[QueueStore] recoverFromOverdue');
+    set((state) => ({
+      queueInfo: {
+        ...state.queueInfo,
+        status: 'waiting',
+        processStatus: 'queuing',
+        aheadCount: Math.floor(Math.random() * 5) + 3
+      }
+    }));
+
+    const recoverMsg: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'system',
+      title: '已恢复排队',
+      content: `您的排队已恢复，请留意叫号通知，这次请及时到场。`,
+      time: new Date().toISOString(),
+      read: false,
+      pageUrl: '/pages/queue/index'
+    };
+    get().addMessage(recoverMsg);
+  },
+
+  completeAndSave: () => {
+    const state = get();
+    const q = state.queueInfo;
+    const ci = q.chargingInfo;
+
+    const record: HistoryRecord = {
+      id: `H${Date.now()}`,
+      stationName: q.stationName,
+      stationId: q.stationId,
+      enterTime: q.joinTime,
+      exitTime: new Date().toISOString(),
+      queueNumber: q.queueNumber,
+      waitTime: q.arriveTime
+        ? Math.round((new Date(q.arriveTime).getTime() - new Date(q.joinTime).getTime()) / 60000)
+        : q.estimatedWaitTime,
+      chargingType: q.chargingPreference.label,
+      vehicleId: q.vehicleId,
+      vehiclePlateNumber: q.vehiclePlateNumber,
+      chargingDuration: ci?.chargingDuration,
+      chargingCost: ci?.estimatedCost,
+      startBattery: 8,
+      endBattery: ci?.currentBattery ?? 90,
+      chargingPileName: ci?.chargingPileName
+    };
+
+    console.log('[QueueStore] completeAndSave, record:', record);
+
+    set((state) => ({
+      historyRecords: [record, ...state.historyRecords],
+      queueInfo: mockNotInQueue
+    }));
+
+    const completeMsg: Message = {
+      id: `msg-${Date.now()}`,
+      type: 'system',
+      title: '充电完成，已保存记录',
+      content: `${q.stationName}充电完成，已充至${ci?.currentBattery ?? 90}%，费用约${ci?.estimatedCost ?? 0}元。记录已保存至历史。`,
+      time: new Date().toISOString(),
+      read: false,
+      pageUrl: '/pages/profile/index'
+    };
+    get().addMessage(completeMsg);
   }
 }));

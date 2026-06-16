@@ -482,3 +482,222 @@
     transform: scale(0.98);
   }
 }
+
+.chargingProgressCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+}
+
+.batteryRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md 0;
+}
+
+.batteryVisual {
+  display: flex;
+  align-items: center;
+}
+
+.batteryShell {
+  width: 320rpx;
+  height: 120rpx;
+  border: 4rpx solid $color-text-primary;
+  border-radius: 12rpx;
+  background: $color-bg-page;
+  overflow: hidden;
+  position: relative;
+}
+
+.batteryFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #4caf50 0%, #8bc34a 50%, #cddc39 100%);
+  border-radius: 8rpx;
+  transition: width 1s ease;
+}
+
+.batteryCap {
+  width: 12rpx;
+  height: 48rpx;
+  background: $color-text-primary;
+  border-radius: 0 4rpx 4rpx 0;
+  margin-left: -2rpx;
+}
+
+.batteryPct {
+  font-size: 56rpx;
+  font-weight: $font-weight-bold;
+  color: $color-success;
+}
+
+.chargingDetails {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+  background: $color-bg-page;
+  border-radius: $radius-md;
+}
+
+.chargingDetailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.chargingDetailLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.chargingDetailValue {
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+}
+
+.overdueCard {
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  text-align: center;
+  border: 2rpx solid #ef5350;
+}
+
+.overdueIcon {
+  font-size: 96rpx;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.overdueTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-error;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.overdueDesc {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  display: block;
+  margin-bottom: $spacing-lg;
+  text-align: left;
+}
+
+.overdueActions {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.recoverBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+}
+
+.rescanBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+}
+
+.callStationBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: $color-bg-card;
+  border: 2rpx solid $color-primary;
+  border-radius: $radius-button;
+  color: $color-primary;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+}
+
+.overdueTip {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  line-height: 1.6;
+  text-align: left;
+  display: block;
+}
+
+.completedCard {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: $radius-xl;
+  padding: $spacing-xl;
+  text-align: center;
+  border: 2rpx solid #4caf50;
+}
+
+.completedIcon {
+  font-size: 96rpx;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.completedTitle {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $color-success;
+  display: block;
+  margin-bottom: $spacing-md;
+}
+
+.completedDesc {
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  display: block;
+  margin-bottom: $spacing-lg;
+}
+
+.completedBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-lg;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  border-radius: $radius-button;
+  color: $color-text-white;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+}
+
+.overdueSimBtn {
+  @include button-reset;
+  width: 100%;
+  height: $button-height-md;
+  background: linear-gradient(135deg, #f44336 0%, #ef5350 100%);
+  border-radius: $radius-button;
+  color: #fff;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  margin-top: $spacing-md;
+  box-shadow: 0 4rpx 16rpx rgba(244, 67, 54, 0.3);
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+}
